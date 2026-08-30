@@ -4,7 +4,14 @@ All notable changes to the KDD Template are documented here.
 
 ## Unreleased
 
-_Sin cambios pendientes._
+**Contract 34 — Bootstrap del paquete TS + deteccion de soporte WebMCP** ([C34-REPORT](docs/reports/CONTRACT-34-REPORT.md))
+
+Primer contrato de `fastwebmcp` (proyecto instanciado desde esta plantilla; numeracion
+continua desde 34 para no colisionar con el historial 01-33 de la plantilla misma —
+ver nota en el reporte). Bootstrap de `package.json`/`tsconfig.json` (TypeScript ESM,
+`node --test` nativo sin build step) y `supportsWebMcp()`: deteccion pura de
+`navigator.modelContext` con fallback a `false` sin lanzar nunca, base para el
+no-op + warning del resto del core.
 
 ## v1.12.0 — 2026-07-26
 
