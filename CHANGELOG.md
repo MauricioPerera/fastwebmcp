@@ -4,6 +4,14 @@ All notable changes to the KDD Template are documented here.
 
 ## Unreleased
 
+**Contract 36 — Builder tipado (Zod) para tools WebMCP Imperativas** ([C36-REPORT](docs/reports/CONTRACT-36-REPORT.md))
+
+`defineTool(spec)`: normaliza `{ name, description, inputSchema: ZodType, execute }` a la
+forma que espera `document.modelContext.registerTool()` — deriva el JSON Schema con
+`z.toJSONSchema` (nativo de Zod 4) y envuelve `execute` para parsear el input ANTES de
+invocar el handler del usuario. Falla en tiempo de definición (no de ejecución) ante un
+spec invalido. Puro: no registra nada, solo define.
+
 **Contract 35 — Fix: supportsWebMcp debe chequear document.modelContext** ([C35-REPORT](docs/reports/CONTRACT-35-REPORT.md))
 
 Correccion post-CONTRACT-34: el spec oficial y la doc de Chrome confirman que la API
