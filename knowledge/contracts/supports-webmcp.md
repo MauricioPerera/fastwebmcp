@@ -1,7 +1,7 @@
 ---
 type: 'Task Contract'
 title: 'Deteccion de soporte WebMCP en runtime'
-description: 'Funcion pura que detecta si navigator.modelContext existe en el navegador visitante.'
+description: 'Funcion pura que detecta si document.modelContext existe en el navegador visitante.'
 tags: ['webmcp', 'feature-detection', 'core']
 
 task: supports-webmcp
@@ -15,7 +15,7 @@ budget:
   lines_max: 15
   params_max: 1
 tests: "tests_ts/supports-webmcp.test.ts"
-tests_sha256: "15622f9663dc997dc8ee706698d391362a2d0d0c2c4ab11acb42f57525aae09a"
+tests_sha256: "85209badc65e58288bf0e26874f0cd8b08651dd056ce05daf107d9c838cd2941"
 touch_only: ['src_ts/supports-webmcp.ts']
 deps_allowed: []
 forbids: ['network', 'subprocess', 'llm']
@@ -25,10 +25,17 @@ forbids: ['network', 'subprocess', 'llm']
 
 ## Intent
 WebMCP solo tiene origin trial (Chrome 149); la mayoria de navegadores visitantes no
-va a tener `navigator.modelContext`. Toda pieza del core (builder, registro, API
+va a tener `document.modelContext`. Toda pieza del core (builder, registro, API
 declarativa) necesita saber esto ANTES de intentar registrar una tool, para poder
 degradar a no-op + warning en vez de romper la pagina (ver
 [DEFINITION.md](../../DEFINITION.md), seccion "no-op silencioso + warning").
+
+**Correccion (post-CONTRACT-34):** la version original de este contrato asumia
+`navigator.modelContext`, tomado de fuentes secundarias. El spec oficial
+(webmachinelearning.github.io/webmcp) y la documentacion de Chrome confirman que la
+API vive en `document.modelContext` (IDL: `partial interface Document { readonly
+attribute ModelContext modelContext; }`), no en `Navigator`. Corregido antes de
+construir `defineTool()` encima.
 
 ## Interface
 ```
@@ -36,24 +43,25 @@ function supportsWebMcp(): boolean
 ```
 
 ## Invariants
-- Nunca lanza una excepcion, sea cual sea la forma de `globalThis.navigator`.
-- Devuelve `true` unicamente cuando `navigator.modelContext` existe y es un objeto
+- Nunca lanza una excepcion, sea cual sea la forma de `globalThis.document`.
+- Devuelve `true` unicamente cuando `document.modelContext` existe y es un objeto
   (`typeof === 'object'`, no `null`).
-- No tiene efectos secundarios (no muta `navigator`, no hace I/O).
+- No tiene efectos secundarios (no muta `document`, no hace I/O).
 
 ## Examples
-- `navigator = { modelContext: {} }` -> `true`
-- `navigator = {}` -> `false`
-- `navigator = { modelContext: null }` -> `false`
-- `navigator` no existe (SSR) -> `false`
-- `navigator = { modelContext: 'no-es-un-objeto' }` -> `false`
+- `document = { modelContext: {} }` -> `true`
+- `document = {}` -> `false`
+- `document = { modelContext: null }` -> `false`
+- `document` no existe (SSR) -> `false`
+- `document = { modelContext: 'no-es-un-objeto' }` -> `false`
 
 ## Do / Don't
-- DO: usar `typeof globalThis.navigator !== 'undefined'` para tolerar entornos SSR
-  donde `navigator` no existe.
-- DON'T: asumir que `navigator.modelContext` truthy implica que es un objeto (un
+- DO: usar `typeof globalThis.document !== 'undefined'` para tolerar entornos SSR
+  donde `document` no existe.
+- DON'T: asumir que `document.modelContext` truthy implica que es un objeto (un
   string no vacio tambien es truthy).
 - DON'T: agregar red, `subprocess`/`child_process`, ni ninguna llamada a un LLM.
+- DON'T: chequear `navigator.modelContext` — no es donde vive la API real.
 
 ## Tests
 (Los tests estan en `tests_ts/supports-webmcp.test.ts` — escritos ANTES de la

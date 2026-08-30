@@ -4,14 +4,22 @@ All notable changes to the KDD Template are documented here.
 
 ## Unreleased
 
+**Contract 35 — Fix: supportsWebMcp debe chequear document.modelContext** ([C35-REPORT](docs/reports/CONTRACT-35-REPORT.md))
+
+Correccion post-CONTRACT-34: el spec oficial y la doc de Chrome confirman que la API
+de WebMCP vive en `document.modelContext` (IDL: `partial interface Document { readonly
+attribute ModelContext modelContext; }`), no en `navigator`. `supportsWebMcp()` y su
+oraculo se corrigieron antes de construir nada encima.
+
 **Contract 34 — Bootstrap del paquete TS + deteccion de soporte WebMCP** ([C34-REPORT](docs/reports/CONTRACT-34-REPORT.md))
 
 Primer contrato de `fastwebmcp` (proyecto instanciado desde esta plantilla; numeracion
 continua desde 34 para no colisionar con el historial 01-33 de la plantilla misma —
 ver nota en el reporte). Bootstrap de `package.json`/`tsconfig.json` (TypeScript ESM,
 `node --test` nativo sin build step) y `supportsWebMcp()`: deteccion pura de
-`navigator.modelContext` con fallback a `false` sin lanzar nunca, base para el
-no-op + warning del resto del core.
+`document.modelContext` con fallback a `false` sin lanzar nunca, base para el
+no-op + warning del resto del core. (Corregido en Contract 35: la version original
+chequeaba `navigator.modelContext`, incorrecto.)
 
 ## v1.12.0 — 2026-07-26
 
