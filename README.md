@@ -129,6 +129,11 @@ npx http-server .   # or any static file server
 `createWebMcpMock()` · `defineDeclarativeTool(form, spec)` · `respondToAgentSubmit(event, handler)` ·
 `toMcpwasmSkillSource(tool, options?)`
 
+## Changelog
+
+Every release is documented in [`CHANGELOG.md`](CHANGELOG.md), including the RECON
+findings and known limits behind each one — not just a list of what shipped.
+
 ## Development / methodology
 
 This repository is built with [KDD (Knowledge-Driven Development)](https://mauricioperera.github.io/KDD/):

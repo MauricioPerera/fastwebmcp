@@ -82,6 +82,16 @@ jobs:
           node-version: '24'
           cache: 'npm'
 
+      # Must run before any gate that shells out to node/npm -- in particular "Run
+      # each contract's test_command" below invokes `node --test tests_ts/*.ts`
+      # directly, which needs node_modules/zod present. Learned the hard way: the
+      # first version of this workflow change put npm ci near the OLD placeholder's
+      # position (further down) and every TS contract failed with
+      # ERR_MODULE_NOT_FOUND on the real CI run, not locally (node_modules already
+      # existed locally from prior manual installs).
+      - name: Install Node dependencies
+        run: npm ci
+
       - name: Validate contracts
         run: python scripts/validate_contracts.py ${{ inputs.contracts_dir || 'knowledge/contracts' }}
 
@@ -150,12 +160,12 @@ jobs:
       # TypeScript source (src_ts/), which `node --test tests_ts/*.ts` runs via Node's
       # native type-stripping -- unflagged by default since Node v23.6.0, hence
       # node-version 24 (not the 20 this step used when it only existed for the
-      # now-removed multi-language example contract). RECON before wiring this:
-      # `rm -rf node_modules && npm ci && npm run typecheck && npm test && npm run
-      # build && npm run build:examples` all verified green locally first.
-      - name: Install Node dependencies
-        run: npm ci
-
+      # now-removed multi-language example contract). node_modules is already
+      # installed (see "Install Node dependencies" near the top -- it has to run
+      # before "Run each contract's test_command" above, which also shells out to
+      # `node --test`). RECON before wiring this: `rm -rf node_modules && npm ci &&
+      # npm run typecheck && npm test && npm run build && npm run build:examples`
+      # all verified green locally first.
       - name: TypeScript typecheck
         run: npm run typecheck
 
