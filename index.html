@@ -366,6 +366,7 @@
   }
   .panel-label.bad { color: var(--muted); }
   .panel-label.good { color: var(--structure); }
+  .panel-note { margin-top: 0.5rem; color: var(--ink-soft); font-size: 0.95rem; }
 
   figure { margin: 2.25rem 0 0; }
   figcaption {
@@ -472,6 +473,7 @@
         <a href="#apis">APIs</a>
         <a href="#architecture" data-i18n="nav.how">How it works</a>
         <a href="#status" data-i18n="nav.status">Status</a>
+        <a href="#mcpwasm">mcpwasm</a>
         <a href="https://github.com/MauricioPerera/fastwebmcp">GitHub</a>
       </nav>
       <div class="lang-switch" role="group" data-i18n="lang.label" data-i18n-attr="aria-label" aria-label="Language">
@@ -703,6 +705,52 @@ form.addEventListener(<span class="str">'submit'</span>, (e) =&gt; {
   </div>
 </section>
 
+<section id="mcpwasm">
+  <div class="shell">
+    <p class="eyebrow" data-i18n="mcpwasm.eyebrow">Beyond the browser</p>
+    <h2 data-i18n="mcpwasm.h2">The same schema, published as a static mcpwasm skill.</h2>
+    <p class="lede prose" data-i18n="mcpwasm.lede">
+      <code>toMcpwasmSkillSource()</code> reuses the JSON Schema <code>defineTool()</code>
+      already derived from your Zod spec to emit the <code>registerTool({...})</code>
+      source <a href="https://github.com/MauricioPerera/mcpwasm">mcpwasm</a> expects in a
+      <code>tool.js</code> &mdash; no re-declaring it by hand for a second target.
+    </p>
+
+    <div class="two-col">
+      <div>
+        <span class="panel-label good" data-i18n="mcpwasm.crosses_label">What crosses the boundary</span>
+        <p class="panel-note" data-i18n="mcpwasm.crosses_p">
+          <code>name</code>, <code>description</code>, <code>inputSchema</code> &mdash; the
+          exact JSON Schema <code>defineTool()</code> already computed.
+        </p>
+      </div>
+      <div>
+        <span class="panel-label bad" data-i18n="mcpwasm.stays_label">What doesn't</span>
+        <p class="panel-note" data-i18n="mcpwasm.stays_p">
+          Your <code>execute</code>. mcpwasm's <code>handler</code> runs sandboxed in
+          QuickJS-wasm &mdash; no DOM, no <code>fetch</code>, no <code>window</code>. You
+          write that logic separately.
+        </p>
+      </div>
+    </div>
+
+    <div class="code-panel" style="margin-top:1.75rem; max-width: 62ch;">
+<pre><span class="kw">import</span> { defineTool, toMcpwasmSkillSource } <span class="kw">from</span> <span class="str">'fastwebmcp'</span>;
+
+<span class="kw">const</span> tool = defineTool({
+  name: <span class="str">'sum_numbers'</span>,
+  description: <span class="str">'Sum two numbers a and b.'</span>,
+  inputSchema: z.object({ a: z.number(), b: z.number() }),
+  execute: <span class="kw">async</span> ({ a, b }) =&gt; a + b, <span class="com">// browser-only, never auto-translated</span>
+});
+
+toMcpwasmSkillSource(tool, {
+  handlerBody: <span class="str">'return args.a + args.b;'</span> <span class="com">// you write this: no DOM in the sandbox</span>
+});</pre>
+    </div>
+  </div>
+</section>
+
 <section id="testing">
   <div class="shell">
     <p class="eyebrow" data-i18n="testing.eyebrow">No browser required</p>
@@ -795,6 +843,13 @@ registerYourTools();
       'architecture.h2': 'One call, two outcomes &mdash; the page never breaks either way.',
       'architecture.lede': 'Every registration path runs through the same check. If the browser can hear it, the agent gets a validated tool. If it can\'t, your page just renders &mdash; a warning in the console, nothing more.',
       'architecture.figcaption': 'Both <code>registerTool()</code> and the Declarative form path run the same <code>supportsWebMcp()</code> branch before touching the browser &mdash; the difference is only what happens at the two ends.',
+      'mcpwasm.eyebrow': 'Beyond the browser',
+      'mcpwasm.h2': 'The same schema, published as a static mcpwasm skill.',
+      'mcpwasm.lede': '<code>toMcpwasmSkillSource()</code> reuses the JSON Schema <code>defineTool()</code> already derived from your Zod spec to emit the <code>registerTool({...})</code> source <a href="https://github.com/MauricioPerera/mcpwasm">mcpwasm</a> expects in a <code>tool.js</code> &mdash; no re-declaring it by hand for a second target.',
+      'mcpwasm.crosses_label': 'What crosses the boundary',
+      'mcpwasm.crosses_p': '<code>name</code>, <code>description</code>, <code>inputSchema</code> &mdash; the exact JSON Schema <code>defineTool()</code> already computed.',
+      'mcpwasm.stays_label': "What doesn't",
+      'mcpwasm.stays_p': 'Your <code>execute</code>. mcpwasm\'s <code>handler</code> runs sandboxed in QuickJS-wasm &mdash; no DOM, no <code>fetch</code>, no <code>window</code>. You write that logic separately.',
       'diagram.aria': 'Diagram: a Zod spec passed to defineTool or defineDeclarativeTool becomes a normalized tool, which supportsWebMcp() routes down one of two paths. If WebMCP is supported, it registers with document.modelContext and an AI agent can call it. If not, it logs a console warning and no-ops, and the page continues to render normally for humans.',
       'diagram.your_spec': 'your spec',
       'diagram.zod_handler': 'zod + handler',
@@ -847,6 +902,13 @@ registerYourTools();
       'architecture.h2': 'Un llamado, dos resultados &mdash; la página nunca se rompe.',
       'architecture.lede': 'Todo camino de registro pasa por el mismo chequeo. Si el navegador puede escucharlo, el agente recibe una tool validada. Si no puede, tu página simplemente se renderiza &mdash; una advertencia en la consola, nada más.',
       'architecture.figcaption': 'Tanto <code>registerTool()</code> como el camino del formulario Declarativo corren la misma rama de <code>supportsWebMcp()</code> antes de tocar el navegador &mdash; la diferencia es solo qué pasa en los dos extremos.',
+      'mcpwasm.eyebrow': 'Más allá del navegador',
+      'mcpwasm.h2': 'El mismo schema, publicado como skill estática de mcpwasm.',
+      'mcpwasm.lede': '<code>toMcpwasmSkillSource()</code> reusa el JSON Schema que <code>defineTool()</code> ya derivó de tu spec de Zod para emitir el <code>registerTool({...})</code> que <a href="https://github.com/MauricioPerera/mcpwasm">mcpwasm</a> espera en un <code>tool.js</code> &mdash; sin volver a declararlo a mano para un segundo target.',
+      'mcpwasm.crosses_label': 'Lo que cruza la frontera',
+      'mcpwasm.crosses_p': '<code>name</code>, <code>description</code>, <code>inputSchema</code> &mdash; el mismo JSON Schema que <code>defineTool()</code> ya calculó.',
+      'mcpwasm.stays_label': 'Lo que no',
+      'mcpwasm.stays_p': 'Tu <code>execute</code>. El <code>handler</code> de mcpwasm corre sandboxeado en QuickJS-wasm &mdash; sin DOM, sin <code>fetch</code>, sin <code>window</code>. Esa lógica la escribís aparte.',
       'diagram.aria': 'Diagrama: un spec de Zod pasado a defineTool o defineDeclarativeTool se convierte en una tool normalizada, que supportsWebMcp() enruta por uno de dos caminos. Si WebMCP está soportado, se registra con document.modelContext y un agente de IA puede llamarla. Si no, registra una advertencia en consola y no hace nada, y la página sigue renderizando normalmente para humanos.',
       'diagram.your_spec': 'tu spec',
       'diagram.zod_handler': 'zod + handler',
@@ -899,6 +961,13 @@ registerYourTools();
       'architecture.h2': 'Uma chamada, dois resultados &mdash; a página nunca quebra.',
       'architecture.lede': 'Todo caminho de registro passa pela mesma verificação. Se o navegador consegue ouvir, o agente recebe uma tool validada. Se não consegue, sua página simplesmente renderiza &mdash; um aviso no console, nada mais.',
       'architecture.figcaption': 'Tanto o <code>registerTool()</code> quanto o caminho do formulário Declarativo passam pelo mesmo branch de <code>supportsWebMcp()</code> antes de tocar o navegador &mdash; a diferença é só o que acontece nas duas pontas.',
+      'mcpwasm.eyebrow': 'Além do navegador',
+      'mcpwasm.h2': 'O mesmo schema, publicado como skill estática do mcpwasm.',
+      'mcpwasm.lede': '<code>toMcpwasmSkillSource()</code> reaproveita o JSON Schema que <code>defineTool()</code> já derivou da sua spec do Zod para emitir o <code>registerTool({...})</code> que o <a href="https://github.com/MauricioPerera/mcpwasm">mcpwasm</a> espera num <code>tool.js</code> &mdash; sem redeclará-lo à mão para um segundo alvo.',
+      'mcpwasm.crosses_label': 'O que atravessa a fronteira',
+      'mcpwasm.crosses_p': '<code>name</code>, <code>description</code>, <code>inputSchema</code> &mdash; o mesmo JSON Schema que <code>defineTool()</code> já calculou.',
+      'mcpwasm.stays_label': 'O que não',
+      'mcpwasm.stays_p': 'Seu <code>execute</code>. O <code>handler</code> do mcpwasm roda isolado em QuickJS-wasm &mdash; sem DOM, sem <code>fetch</code>, sem <code>window</code>. Essa lógica você escreve à parte.',
       'diagram.aria': 'Diagrama: um spec do Zod passado para defineTool ou defineDeclarativeTool se torna uma tool normalizada, que supportsWebMcp() encaminha por um de dois caminhos. Se o WebMCP for suportado, ela é registrada com document.modelContext e um agente de IA pode chamá-la. Se não for, ela registra um aviso no console e não faz nada, e a página continua renderizando normalmente para humanos.',
       'diagram.your_spec': 'sua spec',
       'diagram.zod_handler': 'zod + handler',
