@@ -1,13 +1,45 @@
 {
   "name": "fastwebmcp",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "FastMCP-style ergonomics for WebMCP: typed builders over the Imperative and Declarative browser APIs.",
   "type": "module",
-  "private": true,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MauricioPerera/fastwebmcp.git"
+  },
+  "homepage": "https://github.com/MauricioPerera/fastwebmcp#readme",
+  "bugs": {
+    "url": "https://github.com/MauricioPerera/fastwebmcp/issues"
+  },
+  "keywords": [
+    "webmcp",
+    "mcp",
+    "model-context-protocol",
+    "ai-agents",
+    "browser",
+    "zod"
+  ],
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "typecheck": "tsc --noEmit",
     "test": "node --test tests_ts/**/*.test.ts",
-    "build:examples": "esbuild examples/imperative-demo.ts examples/declarative-demo.ts --bundle --minify --format=esm --outdir=examples/dist"
+    "build": "tsc -p tsconfig.build.json",
+    "build:examples": "esbuild examples/imperative-demo.ts examples/declarative-demo.ts --bundle --minify --format=esm --outdir=examples/dist",
+    "prepublishOnly": "npm run typecheck && npm test && npm run build"
   },
   "dependencies": {
     "zod": "^4.5.4"

@@ -22,6 +22,7 @@ dist/
 build/
 *.egg-info/
 coverage/
+*.tgz
 
 # .agents es donde residen las reglas de los agentes, por lo tanto NO lo ignoramos.
 # Sin embargo, los logs generados por ellos sí (evidencia local, no versionada):

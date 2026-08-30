@@ -4,6 +4,17 @@ All notable changes to the KDD Template are documented here.
 
 ## Unreleased
 
+**Contract 41 — Paquete listo para publicar a npm** ([C41-REPORT](docs/reports/CONTRACT-41-REPORT.md))
+
+`tsconfig.build.json` (usa `rewriteRelativeImportExtensions`, TS 5.7+) genera un build
+real sin bundlear (`dist/*.js`+`.d.ts`, `zod` externo). `package.json` listo para
+publicar: `main`/`types`/`exports`/`files`, metadata del repo, `version: 0.1.0`,
+`prepublishOnly`. El `README.md` de la raiz (que seguia siendo el generico de la
+plantilla KDD) se reescribio con documentacion real de la libreria. Verificado
+empaquetando de verdad (`npm pack`) e instalando el tarball en un proyecto aislado: los
+6 exports resuelven y un roundtrip completo corre contra el paquete YA empaquetado, no
+contra el codigo fuente. `npm publish` en si queda para el usuario (sus credenciales).
+
 **Contract 40 — Demos verificadas contra document.modelContext real** ([C40-REPORT](docs/reports/CONTRACT-40-REPORT.md))
 
 `src_ts/index.ts` (barrel export publico) + `esbuild` como devDependency para bundlear
