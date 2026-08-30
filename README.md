@@ -1,5 +1,6 @@
 # fastwebmcp
 
+[![CI](https://github.com/MauricioPerera/fastwebmcp/actions/workflows/validate.yml/badge.svg)](https://github.com/MauricioPerera/fastwebmcp/actions/workflows/validate.yml)
 [![npm](https://img.shields.io/npm/v/fastwebmcp)](https://www.npmjs.com/package/fastwebmcp)
 [![GitHub release](https://img.shields.io/github/v/release/MauricioPerera/fastwebmcp)](https://github.com/MauricioPerera/fastwebmcp/releases/tag/v0.2.1)
 [![license](https://img.shields.io/npm/l/fastwebmcp)](LICENSE)
