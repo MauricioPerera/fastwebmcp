@@ -4,6 +4,16 @@ All notable changes to the KDD Template are documented here.
 
 ## Unreleased
 
+**Contract 39 — API Declarativa: anotar un form + responder al submit** ([C39-REPORT](docs/reports/CONTRACT-39-REPORT.md))
+
+`defineDeclarativeTool(form, spec)`: setea `toolname`/`tooldescription`/
+`toolautosubmit?`/`toolparamdescription` (los 4 atributos fijados por el explainer del
+spec; el algoritmo de derivacion del JSON Schema completo sigue TBD upstream, fuera de
+alcance a proposito). `respondToAgentSubmit(event, handler)`: si
+`event.agentInvoked`, corre `handler` y reenvia su resultado (o rechazo) via
+`event.respondWith`; si no, no-op. Cierra las 4 de 5 capacidades objetivo de
+`DEFINITION.md` con al menos una pieza construida — falta solo demos/examples.
+
 **Contract 38 — Harness de testing: createWebMcpMock() + dedup de mocks** ([C38-REPORT](docs/reports/CONTRACT-38-REPORT.md))
 
 `createWebMcpMock()`: un `document` mockeable apto para `registerTool()` mas
