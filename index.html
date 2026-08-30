@@ -256,13 +256,15 @@
   /* ---------- Hero ---------- */
   .hero {
     padding: clamp(3rem, 8vw, 6rem) 0 clamp(2.5rem, 6vw, 4rem);
+  }
+  .hero-grid {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: clamp(2rem, 5vw, 4rem);
     align-items: center;
   }
   @media (max-width: 900px) {
-    .hero { grid-template-columns: minmax(0, 1fr); }
+    .hero-grid { grid-template-columns: minmax(0, 1fr); }
   }
   .hero h1 {
     font-size: clamp(2.6rem, 5.2vw, 4rem);
@@ -488,7 +490,7 @@
 <div id="top"></div>
 
 <section class="hero" style="border-top:none; padding-top:clamp(2.5rem,6vw,4rem);">
-  <div class="shell hero" style="padding:0; border:none;">
+  <div class="shell hero-grid">
     <div>
       <p class="eyebrow">TypeScript &middot; WebMCP</p>
       <h1 data-i18n="hero.h1">Give the browser its own <em>tool voice.</em></h1>
