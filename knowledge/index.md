@@ -24,6 +24,7 @@ Bienvenido a la base de conocimiento del proyecto. El formato de los nodos está
   - [Deteccion de soporte WebMCP en runtime](./contracts/supports-webmcp.md)
   - [Builder tipado (Zod) para tools WebMCP Imperativas](./contracts/define-tool.md)
   - [Registro seguro de una tool WebMCP con fallback no-op](./contracts/register-tool.md)
+  - [Harness: mock de document.modelContext que invoca tools sin navegador](./contracts/web-mcp-mock.md)
   - [Motor de reglas declarativo (rule contract)](./contracts/validate-rules.md)
   - [Gate determinista de rule contracts](./contracts/rules-gate.md)
   - [Gate de skills de agente](./contracts/skills-gate.md)

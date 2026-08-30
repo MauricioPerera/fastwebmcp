@@ -15,7 +15,7 @@ budget:
   lines_max: 15
   params_max: 1
 tests: "tests_ts/supports-webmcp.test.ts"
-tests_sha256: "85209badc65e58288bf0e26874f0cd8b08651dd056ce05daf107d9c838cd2941"
+tests_sha256: "49b4c9e0bc6eaa5ee0de563ed5dc380330a83c600c0fda4b53fe453a1a926b73"
 touch_only: ['src_ts/supports-webmcp.ts']
 deps_allowed: []
 forbids: ['network', 'subprocess', 'llm']
@@ -36,6 +36,11 @@ degradar a no-op + warning en vez de romper la pagina (ver
 API vive en `document.modelContext` (IDL: `partial interface Document { readonly
 attribute ModelContext modelContext; }`), no en `Navigator`. Corregido antes de
 construir `defineTool()` encima.
+
+**Refactor (CONTRACT-38):** el helper `withDocument` del oraculo se extrajo a
+`tests_ts/mock-globals.ts` (estaba duplicado, verbatim, en `register-tool.test.ts`).
+Mismos 6 casos, mismas aserciones — solo cambio el `import`. `tests_sha256` re-sellado
+en consecuencia.
 
 ## Interface
 ```

@@ -4,6 +4,15 @@ All notable changes to the KDD Template are documented here.
 
 ## Unreleased
 
+**Contract 38 — Harness de testing: createWebMcpMock() + dedup de mocks** ([C38-REPORT](docs/reports/CONTRACT-38-REPORT.md))
+
+`createWebMcpMock()`: un `document` mockeable apto para `registerTool()` mas
+`invokeTool(name, input)`, que ejecuta el `execute` REAL de la tool registrada (con
+parseo Zod incluido) — la capacidad "invoca y verifica tools sin navegador real" de
+`DEFINITION.md`. Ademas, se extrajo `withDocument`/`withWarnSpy` (duplicados entre
+`supports-webmcp.test.ts` y `register-tool.test.ts`) a `tests_ts/mock-globals.ts`;
+ambos oraculos afectados fueron re-sellados (refactor, mismo comportamiento).
+
 **Contract 37 — registerTool(): une defineTool + supportsWebMcp** ([C37-REPORT](docs/reports/CONTRACT-37-REPORT.md))
 
 `registerTool(spec, options?)`: valida siempre vía `defineTool` (lanza ante spec inválido

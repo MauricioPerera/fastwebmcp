@@ -15,7 +15,7 @@ budget:
   lines_max: 25
   params_max: 2
 tests: "tests_ts/register-tool.test.ts"
-tests_sha256: "7fb0ac7a060a37c6fea1eb3a78b7199eaa293b9e5d4249232985f26ea101b762"
+tests_sha256: "83230b020903de6cffac5bfd7de32cfc2ad5bace90647477c7bf53dbbdb63ef5"
 touch_only: ['src_ts/register-tool.ts']
 deps_allowed: ['zod']
 forbids: ['network', 'subprocess', 'llm']
@@ -31,6 +31,10 @@ y normaliza, `supportsWebMcp()` ([contrato](./supports-webmcp.md)) detecta sopor
 llama para exponer una tool, análogo a `@mcp.tool()` de FastMCP. Si el navegador visitante
 no soporta WebMCP (la mayoria hoy, con solo origin trial en Chrome 149), la pagina no se
 rompe: no-op + `console.warn`, según lo cerrado en DEFINITION.md.
+
+**Refactor (CONTRACT-38):** `withDocument`/`withWarnSpy` del oraculo se extrajeron a
+`tests_ts/mock-globals.ts` (estaban duplicados/vivian solo aca). Mismos 5 casos, mismas
+aserciones — solo cambio el `import`. `tests_sha256` re-sellado en consecuencia.
 
 ## Interface
 ```

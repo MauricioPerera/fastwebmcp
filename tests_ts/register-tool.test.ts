@@ -2,35 +2,9 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { z } from 'zod';
 import { registerTool } from '../src_ts/register-tool.ts';
+import { withDocument, withWarnSpy } from './mock-globals.ts';
 
 const noopSignal = new AbortController().signal;
-
-function withDocument(value: unknown, run: () => void): void {
-  const original = Object.getOwnPropertyDescriptor(globalThis, 'document');
-  (globalThis as { document?: unknown }).document = value;
-  try {
-    run();
-  } finally {
-    if (original) {
-      Object.defineProperty(globalThis, 'document', original);
-    } else {
-      delete (globalThis as { document?: unknown }).document;
-    }
-  }
-}
-
-function withWarnSpy(run: (calls: unknown[][]) => void): void {
-  const calls: unknown[][] = [];
-  const original = console.warn;
-  console.warn = (...args: unknown[]) => {
-    calls.push(args);
-  };
-  try {
-    run(calls);
-  } finally {
-    console.warn = original;
-  }
-}
 
 const validSpec = {
   name: 'greet',
