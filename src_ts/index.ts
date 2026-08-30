@@ -9,3 +9,4 @@ export {
   type DeclarativeFormElementLike,
 } from './define-declarative-tool.ts';
 export { respondToAgentSubmit, type AgentSubmitEventLike } from './respond-to-agent-submit.ts';
+export { toMcpwasmSkillSource, type McpwasmSkillOptions } from './to-mcpwasm-skill.ts';

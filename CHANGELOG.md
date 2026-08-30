@@ -4,6 +4,16 @@ All notable changes to the KDD Template are documented here.
 
 ## Unreleased
 
+**Contract 42 — Puente acotado con mcpwasm: solo schema, no runtime** ([C42-REPORT](docs/reports/CONTRACT-42-REPORT.md))
+
+`toMcpwasmSkillSource(tool, options?)`: reusa el `name`/`description`/`inputSchema` ya
+derivado por `defineTool()` para emitir el `registerTool({...})` que
+[mcpwasm](https://github.com/MauricioPerera/mcpwasm) espera en un `tool.js`. RECON
+contra el código real de mcpwasm confirmó que un bridge de RUNTIME es imposible (el
+`execute` de WebMCP necesita DOM; el `handler` de mcpwasm corre en QuickJS-wasm sin DOM
+ni `fetch`) — el `handler` generado queda como placeholder explícito, nunca se traduce
+el `execute` original. No reimplementa el CLI oficial de mcpwasm.
+
 **Contract 41 — Paquete listo para publicar a npm** ([C41-REPORT](docs/reports/CONTRACT-41-REPORT.md))
 
 `tsconfig.build.json` (usa `rewriteRelativeImportExtensions`, TS 5.7+) genera un build

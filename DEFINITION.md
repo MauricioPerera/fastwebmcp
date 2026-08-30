@@ -19,6 +19,7 @@ Core reusable (`fastwebmcp`, paquete npm) + dos pieles que lo consumen:
 - Detección de soporte de WebMCP en runtime: no-op silencioso + warning en consola cuando `document.modelContext` no existe.
 - Harness que invoca y verifica tools sin necesitar un navegador real.
 - Demos ejecutables, verificados contra el panel WebMCP de Chrome DevTools.
+- Exportar el schema de un `DefinedTool` (name/description/inputSchema, ya derivados de Zod) como fuente de skill para `mcpwasm` (github.com/MauricioPerera/mcpwasm) — sin intentar portar el `execute`, imposible entre DOM y el sandbox QuickJS-wasm sin DOM de mcpwasm (verificado contra su código real, no adivinado). No reimplementa el CLI oficial de mcpwasm.
 
 ## Por qué es un caso válido / motivación real
 

@@ -27,6 +27,7 @@ Bienvenido a la base de conocimiento del proyecto. El formato de los nodos está
   - [Harness: mock de document.modelContext que invoca tools sin navegador](./contracts/web-mcp-mock.md)
   - [Generador de anotaciones WebMCP Declarativas sobre un form](./contracts/define-declarative-tool.md)
   - [Responder a un submit disparado por un agente WebMCP Declarativo](./contracts/respond-to-agent-submit.md)
+  - [Exportar un DefinedTool como fuente de skill mcpwasm](./contracts/to-mcpwasm-skill.md)
   - [Motor de reglas declarativo (rule contract)](./contracts/validate-rules.md)
   - [Gate determinista de rule contracts](./contracts/rules-gate.md)
   - [Gate de skills de agente](./contracts/skills-gate.md)
