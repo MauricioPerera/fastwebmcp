@@ -4,6 +4,21 @@ All notable changes to the KDD Template are documented here.
 
 ## Unreleased
 
+**Contract 43 — Conectar la CI real de TypeScript** ([C43-REPORT](docs/reports/CONTRACT-43-REPORT.md))
+
+`.github/workflows/validate.yml` nunca corria nada de TypeScript: el paso placeholder
+`echo` original de la plantilla seguia intacto desde CONTRACT-34 — cada
+typecheck/test/build se verifico manualmente en local, nunca en CI. RECON contra la
+fuente oficial de Node (release notes v23.6.0) confirmo el node-version correcto (24, no
+el 20 heredado de un contrato de ejemplo ya borrado). Mirar la corrida REAL (no asumir
+que "deberia andar") saco a la luz dos bugs reales que el RECON local no detecto: `npm
+ci` en el orden equivocado (ERR_MODULE_NOT_FOUND en los 4 contratos con zod), y un test
+de la suite Python heredada (`test_readme_mentions_changelog_en_and_es`, Contrato 14)
+que veni a siendo falso en silencio desde CONTRACT-41 (el README real de fastwebmcp
+reemplazo legitimamente el formato bilingue de la plantilla) porque nadie habia vuelto a
+correr la suite Python completa desde entonces. Los dos, arreglados y verificados: la
+corrida real en GitHub Actions esta verde en ubuntu-latest y windows-latest.
+
 **Contract 42 — Puente acotado con mcpwasm: solo schema, no runtime** ([C42-REPORT](docs/reports/CONTRACT-42-REPORT.md))
 
 `toMcpwasmSkillSource(tool, options?)`: reusa el `name`/`description`/`inputSchema` ya
