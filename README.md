@@ -1,7 +1,7 @@
 # fastwebmcp
 
 [![npm](https://img.shields.io/npm/v/fastwebmcp)](https://www.npmjs.com/package/fastwebmcp)
-[![GitHub release](https://img.shields.io/github/v/release/MauricioPerera/fastwebmcp)](https://github.com/MauricioPerera/fastwebmcp/releases/tag/v0.1.0)
+[![GitHub release](https://img.shields.io/github/v/release/MauricioPerera/fastwebmcp)](https://github.com/MauricioPerera/fastwebmcp/releases/tag/v0.2.0)
 [![license](https://img.shields.io/npm/l/fastwebmcp)](LICENSE)
 
 FastMCP-style ergonomics for [WebMCP](https://github.com/webmachinelearning/webmcp): typed
@@ -81,6 +81,36 @@ const result = await mock.invokeTool('add_todo', { text: 'Buy milk' });
 `invokeTool` runs the real `execute` your tool was registered with (Zod parsing
 included) — not a reimplementation.
 
+## Publishing the same schema to mcpwasm
+
+```ts
+import { defineTool, toMcpwasmSkillSource } from 'fastwebmcp';
+
+const tool = defineTool({
+  name: 'sum_numbers',
+  description: 'Sum two numbers a and b.',
+  inputSchema: z.object({ a: z.number(), b: z.number() }),
+  execute: async ({ a, b }) => a + b, // browser-only, never auto-translated
+});
+
+console.log(
+  toMcpwasmSkillSource(tool, {
+    handlerBody: 'return args.a + args.b;', // you write this: no DOM in the sandbox
+  }),
+);
+```
+
+`toMcpwasmSkillSource` reuses the JSON Schema `defineTool` already derived from your Zod
+spec to emit the `registerTool({...})` source [mcpwasm](https://github.com/MauricioPerera/mcpwasm)
+expects in a `tool.js`. This is schema-only, not a runtime bridge: mcpwasm's `handler`
+runs sandboxed inside QuickJS-wasm with no DOM, no `fetch`, no `window` — only
+`registerTool`, `host.fetchOrigin`, and bare ECMAScript — so your `execute` (which exists
+specifically to touch the page) can't run there unmodified. What crosses the boundary is
+`name`/`description`/`inputSchema`; the sandboxed `handler` body is always yours to write
+(the function defaults to an explicit `TODO` stub if you don't supply `handlerBody`). It
+doesn't reimplement mcpwasm's own `@rckflr/llms-skills` CLI, which stays the tool for
+scaffolding, hash-sealing, and publishing.
+
 ## Examples
 
 Two runnable demo pages, verified against a real `document.modelContext`, live in
@@ -95,7 +125,8 @@ npx http-server .   # or any static file server
 ## API surface
 
 `supportsWebMcp()` · `defineTool(spec)` · `registerTool(spec, options?)` ·
-`createWebMcpMock()` · `defineDeclarativeTool(form, spec)` · `respondToAgentSubmit(event, handler)`
+`createWebMcpMock()` · `defineDeclarativeTool(form, spec)` · `respondToAgentSubmit(event, handler)` ·
+`toMcpwasmSkillSource(tool, options?)`
 
 ## Development / methodology
 
