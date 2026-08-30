@@ -4,6 +4,16 @@ All notable changes to the KDD Template are documented here.
 
 ## Unreleased
 
+**Contract 40 — Demos verificadas contra document.modelContext real** ([C40-REPORT](docs/reports/CONTRACT-40-REPORT.md))
+
+`src_ts/index.ts` (barrel export publico) + `esbuild` como devDependency para bundlear
+dos demos: Imperativa (todo list con `add_todo`) y Declarativa (support-request form).
+Ambas cargadas y verificadas EN VIVO contra el Chrome real del usuario (v152, con
+`document.modelContext` ya disponible sin tocar `chrome://flags`):
+`document.modelContext.executeTool('add_todo', ...)` corrio el handler real y actualizo
+el DOM; los atributos Declarativos aparecen correctos en el DOM real; el path humano
+(`agentInvoked === false`) produce el fallback esperado. `npm audit`: 0 vulnerabilidades.
+
 **Contract 39 — API Declarativa: anotar un form + responder al submit** ([C39-REPORT](docs/reports/CONTRACT-39-REPORT.md))
 
 `defineDeclarativeTool(form, spec)`: setea `toolname`/`tooldescription`/

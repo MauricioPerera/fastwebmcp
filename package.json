@@ -6,13 +6,15 @@
   "private": true,
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "test": "node --test tests_ts/**/*.test.ts"
+    "test": "node --test tests_ts/**/*.test.ts",
+    "build:examples": "esbuild examples/imperative-demo.ts examples/declarative-demo.ts --bundle --minify --format=esm --outdir=examples/dist"
   },
   "dependencies": {
     "zod": "^4.5.4"
   },
   "devDependencies": {
     "typescript": "^5.7.3",
-    "@types/node": "^24.0.0"
+    "@types/node": "^24.0.0",
+    "esbuild": "^0.28.2"
   }
 }
