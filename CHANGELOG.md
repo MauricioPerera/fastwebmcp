@@ -4,6 +4,14 @@ All notable changes to the KDD Template are documented here.
 
 ## Unreleased
 
+**Contract 37 — registerTool(): une defineTool + supportsWebMcp** ([C37-REPORT](docs/reports/CONTRACT-37-REPORT.md))
+
+`registerTool(spec, options?)`: valida siempre vía `defineTool` (lanza ante spec inválido
+con o sin soporte del navegador); si `supportsWebMcp()` es falso, no-op + `console.warn`
+con el nombre de la tool; si es verdadero, llama a `document.modelContext.registerTool(tool,
+options)`. Cierra el ciclo completo de la API Imperativa: deteccion -> normalizacion ->
+registro con fallback.
+
 **Contract 36 — Builder tipado (Zod) para tools WebMCP Imperativas** ([C36-REPORT](docs/reports/CONTRACT-36-REPORT.md))
 
 `defineTool(spec)`: normaliza `{ name, description, inputSchema: ZodType, execute }` a la
