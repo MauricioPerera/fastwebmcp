@@ -1,3 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>
+  // Runs before first paint to avoid a flash of the wrong theme.
+  (function () {
+    try {
+      var saved = localStorage.getItem('fastwebmcp:theme');
+      if (saved === 'light' || saved === 'dark') {
+        document.documentElement.setAttribute('data-theme', saved);
+      }
+    } catch (e) {}
+  })();
+</script>
 <title>fastwebmcp</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -51,8 +67,9 @@
     --code-ink: #dbe6e3;
   }
 
-  * { box-sizing: border-box; }
+  * { box-sizing: border-box; min-width: 0; }
   html { scroll-behavior: smooth; }
+  html, body { max-width: 100%; overflow-x: hidden; }
 
   body {
     margin: 0;
@@ -100,6 +117,7 @@
     height: 1px;
     background: var(--structure);
     display: inline-block;
+    flex-shrink: 0;
   }
 
   .shell {
@@ -133,6 +151,7 @@
     border: 1px solid var(--surface-line);
     border-radius: 3px;
     padding: 1.1rem 1.25rem;
+    max-width: 100%;
   }
 
   /* ---------- Nav ---------- */
@@ -144,10 +163,11 @@
     backdrop-filter: blur(6px);
     border-bottom: 1px solid var(--surface-line);
   }
-  .topbar .shell {
+  .topbar-inner {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 1rem;
     height: 3.6rem;
   }
   .brand {
@@ -157,16 +177,81 @@
     letter-spacing: -0.01em;
     color: var(--ink);
     text-decoration: none;
+    flex-shrink: 0;
   }
   .brand span { color: var(--accent); }
+  .topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    min-width: 0;
+  }
   .navlinks {
     display: flex;
-    gap: 1.75rem;
+    gap: 1.5rem;
     font-family: var(--font-mono);
     font-size: 0.86rem;
+    overflow-x: auto;
+    scrollbar-width: none;
   }
-  .navlinks a { color: var(--ink-soft); text-decoration: none; }
+  .navlinks::-webkit-scrollbar { display: none; }
+  .navlinks a { color: var(--ink-soft); text-decoration: none; white-space: nowrap; }
   .navlinks a:hover { color: var(--accent); }
+  @media (max-width: 720px) {
+    .navlinks { display: none; }
+  }
+
+  .lang-switch {
+    display: flex;
+    gap: 0.15rem;
+    font-family: var(--font-mono);
+    font-size: 0.76rem;
+    border: 1px solid var(--surface-line);
+    border-radius: 3px;
+    padding: 0.2rem;
+    flex-shrink: 0;
+  }
+  .lang-switch button {
+    background: none;
+    border: none;
+    color: var(--muted);
+    padding: 0.2rem 0.45rem;
+    border-radius: 2px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: inherit;
+  }
+  .lang-switch button[aria-current="true"] {
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  .theme-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border: 1px solid var(--surface-line);
+    border-radius: 3px;
+    background: none;
+    color: var(--ink);
+    cursor: pointer;
+    flex-shrink: 0;
+    padding: 0;
+  }
+  .theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
+  .theme-toggle svg { width: 1.05rem; height: 1.05rem; }
+  .icon-sun { display: block; }
+  .icon-moon { display: none; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .icon-sun { display: none; }
+    :root:not([data-theme="light"]) .icon-moon { display: block; }
+  }
+  :root[data-theme="dark"] .icon-sun { display: none; }
+  :root[data-theme="dark"] .icon-moon { display: block; }
+  :root[data-theme="light"] .icon-sun { display: block; }
+  :root[data-theme="light"] .icon-moon { display: none; }
 
   /* ---------- Hero ---------- */
   .hero {
@@ -177,7 +262,7 @@
     align-items: center;
   }
   @media (max-width: 900px) {
-    .hero { grid-template-columns: 1fr; }
+    .hero { grid-template-columns: minmax(0, 1fr); }
   }
   .hero h1 {
     font-size: clamp(2.6rem, 5.2vw, 4rem);
@@ -211,6 +296,9 @@
     display: inline-flex;
     align-items: center;
     gap: 0.6rem;
+    max-width: 100%;
+    overflow-x: auto;
+    white-space: nowrap;
   }
   .install-chip .p { color: color-mix(in srgb, var(--paper) 55%, transparent); }
   .btn-ghost {
@@ -221,6 +309,7 @@
     border: 1px solid var(--surface-line);
     padding: 0.62rem 1rem;
     border-radius: 3px;
+    white-space: nowrap;
   }
   .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
 
@@ -231,7 +320,9 @@
     border: 1px solid var(--surface-line);
     border-radius: 4px;
     padding: 1.4rem 1.5rem 1.4rem 1.5rem;
+    max-width: 100%;
   }
+  .annotated pre { max-width: 100%; }
   .annotated .tag { color: var(--structure); }
   .annotated .attr { color: var(--muted); }
   .annotated .val { color: var(--ink); }
@@ -250,18 +341,18 @@
   }
 
   /* ---------- Sections ---------- */
-  section { padding: clamp(3rem, 7vw, 5rem) 0; border-top: 1px solid var(--surface-line); }
+  section { padding: clamp(3rem, 7vw, 5rem) 0; border-top: 1px solid var(--surface-line); overflow-x: hidden; }
   section > .shell > .eyebrow { margin-bottom: 0.9rem; }
   section h2 { font-size: clamp(1.7rem, 3.2vw, 2.3rem); }
   section .lede { margin-top: 0.85rem; color: var(--ink-soft); font-size: 1.05rem; }
 
   .two-col {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: 1.25rem;
     margin-top: 2rem;
   }
-  @media (max-width: 800px) { .two-col { grid-template-columns: 1fr; } }
+  @media (max-width: 800px) { .two-col { grid-template-columns: minmax(0, 1fr); } }
 
   .panel-label {
     font-family: var(--font-mono);
@@ -286,16 +377,18 @@
     border: 1px solid var(--surface-line);
     border-radius: 4px;
     padding: clamp(1rem, 3vw, 2rem);
+    max-width: 100%;
+    overflow-x: auto;
   }
   svg { display: block; max-width: 100%; height: auto; }
 
   .api-cards {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: 1.5rem;
     margin-top: 2.25rem;
   }
-  @media (max-width: 800px) { .api-cards { grid-template-columns: 1fr; } }
+  @media (max-width: 800px) { .api-cards { grid-template-columns: minmax(0, 1fr); } }
   .api-card {
     border: 1px solid var(--surface-line);
     border-radius: 4px;
@@ -321,7 +414,7 @@
 
   .status-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 1px;
     background: var(--surface-line);
     border: 1px solid var(--surface-line);
@@ -330,6 +423,7 @@
   .status-item {
     background: var(--paper);
     padding: 1.4rem 1.5rem;
+    min-width: 0;
   }
   .status-item .k {
     font-family: var(--font-mono);
@@ -355,6 +449,7 @@
   }
   .foot-links {
     display: flex;
+    flex-wrap: wrap;
     gap: 1.5rem;
     font-family: var(--font-mono);
     font-size: 0.86rem;
@@ -363,17 +458,30 @@
   .foot-links a:hover { color: var(--accent); }
   .foot-note { font-size: 0.84rem; color: var(--muted); font-family: var(--font-mono); }
 </style>
+</head>
+<body>
 
 <div class="topbar">
-  <div class="shell">
+  <div class="shell topbar-inner">
     <a class="brand" href="#top">fast<span>web</span>mcp</a>
-    <nav class="navlinks">
-      <a href="#compare">Why</a>
-      <a href="#apis">APIs</a>
-      <a href="#architecture">How it works</a>
-      <a href="#status">Status</a>
-      <a href="https://github.com/MauricioPerera/fastwebmcp">GitHub</a>
-    </nav>
+    <div class="topbar-right">
+      <nav class="navlinks">
+        <a href="#compare" data-i18n="nav.why">Why</a>
+        <a href="#apis">APIs</a>
+        <a href="#architecture" data-i18n="nav.how">How it works</a>
+        <a href="#status" data-i18n="nav.status">Status</a>
+        <a href="https://github.com/MauricioPerera/fastwebmcp">GitHub</a>
+      </nav>
+      <div class="lang-switch" role="group" data-i18n="lang.label" data-i18n-attr="aria-label" aria-label="Language">
+        <button type="button" data-lang-btn="en">EN</button>
+        <button type="button" data-lang-btn="es">ES</button>
+        <button type="button" data-lang-btn="pt">PT</button>
+      </div>
+      <button type="button" class="theme-toggle" id="theme-toggle" data-i18n="theme.toggle" data-i18n-attr="aria-label" aria-label="Toggle color theme">
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.5v2.4M12 19.1v2.4M4.4 4.4l1.7 1.7M17.9 17.9l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.4 19.6l1.7-1.7M17.9 6.1l1.7-1.7"></path></svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a6.8 6.8 0 0 0 10.5 10.5Z"></path></svg>
+      </button>
+    </div>
   </div>
 </div>
 
@@ -383,8 +491,8 @@
   <div class="shell hero" style="padding:0; border:none;">
     <div>
       <p class="eyebrow">TypeScript &middot; WebMCP</p>
-      <h1>Give the browser its own <em>tool voice.</em></h1>
-      <p class="hero-sub">
+      <h1 data-i18n="hero.h1">Give the browser its own <em>tool voice.</em></h1>
+      <p class="hero-sub" data-i18n="hero.sub">
         fastwebmcp brings FastMCP-style ergonomics to <a href="https://github.com/webmachinelearning/webmcp">WebMCP</a>:
         typed Zod builders over the browser's Imperative and Declarative APIs &mdash;
         with a safe no-op fallback for the browsers (most of them, still) that don't
@@ -393,11 +501,11 @@
       <div class="hero-actions">
         <span class="install-chip"><span class="p">$</span> npm install fastwebmcp</span>
         <a class="btn-ghost" href="https://www.npmjs.com/package/fastwebmcp">npm &#8599;</a>
-        <a class="btn-ghost" href="https://github.com/MauricioPerera/fastwebmcp">Source &#8599;</a>
+        <a class="btn-ghost" href="https://github.com/MauricioPerera/fastwebmcp" data-i18n="hero.source">Source &#8599;</a>
       </div>
     </div>
 
-    <div class="annotated" aria-hidden="false">
+    <div class="annotated">
       <pre><span class="tag">&lt;form</span>
   <mark>toolname</mark>=<span class="str">"submit_support_request"</span>
   <mark>tooldescription</mark>=<span class="str">"Submit a request for support."</span><span class="tag">&gt;</span>
@@ -409,16 +517,16 @@
 
   <span class="tag">&lt;button&gt;</span>Submit<span class="tag">&lt;/button&gt;</span>
 <span class="tag">&lt;/form&gt;</span></pre>
-      <p class="callout-label">&#8593; three attributes, set by <code>defineDeclarativeTool()</code> &mdash; not written by hand</p>
+      <p class="callout-label" data-i18n="hero.callout">&#8593; three attributes, set by <code>defineDeclarativeTool()</code> &mdash; not written by hand</p>
     </div>
   </div>
 </section>
 
 <section id="compare">
   <div class="shell">
-    <p class="eyebrow">The gap</p>
-    <h2>Raw WebMCP asks you to hand-write a JSON Schema and trust the input.</h2>
-    <p class="lede prose">
+    <p class="eyebrow" data-i18n="compare.eyebrow">The gap</p>
+    <h2 data-i18n="compare.h2">Raw WebMCP asks you to hand-write a JSON Schema and trust the input.</h2>
+    <p class="lede prose" data-i18n="compare.lede">
       MCP had the same problem, until FastMCP made a Python type hint into a working
       tool definition. WebMCP is at that same point today &mdash; the official examples
       register tools with a schema typed out by hand and no validation between the
@@ -427,7 +535,7 @@
 
     <div class="two-col">
       <div>
-        <span class="panel-label bad">Without fastwebmcp</span>
+        <span class="panel-label bad" data-i18n="compare.bad">Without fastwebmcp</span>
         <div class="code-panel">
 <pre>document.modelContext.registerTool({
   name: <span class="str">'add_todo'</span>,
@@ -447,7 +555,7 @@
         </div>
       </div>
       <div>
-        <span class="panel-label good">With fastwebmcp</span>
+        <span class="panel-label good" data-i18n="compare.good">With fastwebmcp</span>
         <div class="code-panel">
 <pre><span class="kw">import</span> { z } <span class="kw">from</span> <span class="str">'zod'</span>;
 <span class="kw">import</span> { registerTool } <span class="kw">from</span> <span class="str">'fastwebmcp'</span>;
@@ -471,9 +579,9 @@ registerTool({
 
 <section id="apis">
   <div class="shell">
-    <p class="eyebrow">Two surfaces</p>
-    <h2>Register a function, or annotate a form &mdash; your call.</h2>
-    <p class="lede prose">
+    <p class="eyebrow" data-i18n="apis.eyebrow">Two surfaces</p>
+    <h2 data-i18n="apis.h2">Register a function, or annotate a form &mdash; your call.</h2>
+    <p class="lede prose" data-i18n="apis.lede">
       WebMCP ships two ways to expose a tool. fastwebmcp gives both the same
       validate-then-run discipline.
     </p>
@@ -481,7 +589,7 @@ registerTool({
     <div class="api-cards">
       <div class="api-card">
         <header>
-          <h3>Imperative</h3>
+          <h3 data-i18n="apis.imperative">Imperative</h3>
           <p><code>defineTool()</code> + <code>registerTool()</code></p>
         </header>
         <div class="code-panel">
@@ -500,7 +608,7 @@ registerTool({
 
       <div class="api-card">
         <header>
-          <h3>Declarative</h3>
+          <h3 data-i18n="apis.declarative">Declarative</h3>
           <p><code>defineDeclarativeTool()</code> + <code>respondToAgentSubmit()</code></p>
         </header>
         <div class="code-panel">
@@ -521,9 +629,9 @@ form.addEventListener(<span class="str">'submit'</span>, (e) =&gt; {
 
 <section id="architecture">
   <div class="shell">
-    <p class="eyebrow">Mechanism</p>
-    <h2>One call, two outcomes &mdash; the page never breaks either way.</h2>
-    <p class="lede prose">
+    <p class="eyebrow" data-i18n="architecture.eyebrow">Mechanism</p>
+    <h2 data-i18n="architecture.h2">One call, two outcomes &mdash; the page never breaks either way.</h2>
+    <p class="lede prose" data-i18n="architecture.lede">
       Every registration path runs through the same check. If the browser can hear it,
       the agent gets a validated tool. If it can't, your page just renders &mdash; a
       warning in the console, nothing more.
@@ -531,7 +639,7 @@ form.addEventListener(<span class="str">'submit'</span>, (e) =&gt; {
 
     <figure>
       <div class="diagram-frame">
-        <svg viewBox="0 -30 920 410" role="img" aria-label="Diagram: a Zod spec passed to defineTool or defineDeclarativeTool becomes a normalized tool, which supportsWebMcp() routes down one of two paths. If WebMCP is supported, it registers with document.modelContext and an AI agent can call it. If not, it logs a console warning and no-ops, and the page continues to render normally for humans.">
+        <svg viewBox="0 -30 920 410" role="img" data-i18n="diagram.aria" data-i18n-attr="aria-label" aria-label="Diagram: a Zod spec passed to defineTool or defineDeclarativeTool becomes a normalized tool, which supportsWebMcp() routes down one of two paths. If WebMCP is supported, it registers with document.modelContext and an AI agent can call it. If not, it logs a console warning and no-ops, and the page continues to render normally for humans.">
           <defs>
             <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
               <path d="M0,0 L10,5 L0,10 Z" fill="currentColor"></path>
@@ -542,8 +650,8 @@ form.addEventListener(<span class="str">'submit'</span>, (e) =&gt; {
 
             <!-- your spec -->
             <rect x="20" y="150" width="150" height="60" rx="3" fill="none" stroke="currentColor" stroke-width="1.2"></rect>
-            <text x="95" y="175" text-anchor="middle">your spec</text>
-            <text x="95" y="193" text-anchor="middle" fill="currentColor" opacity="0.6" font-size="11">zod + handler</text>
+            <text x="95" y="175" text-anchor="middle" data-i18n="diagram.your_spec">your spec</text>
+            <text x="95" y="193" text-anchor="middle" fill="currentColor" opacity="0.6" font-size="11" data-i18n="diagram.zod_handler">zod + handler</text>
 
             <!-- arrow to define -->
             <line x1="170" y1="180" x2="228" y2="180" stroke="currentColor" stroke-width="1.2" marker-end="url(#arrow)"></line>
@@ -551,8 +659,8 @@ form.addEventListener(<span class="str">'submit'</span>, (e) =&gt; {
 
             <!-- normalized tool -->
             <rect x="230" y="150" width="170" height="60" rx="3" fill="none" stroke="currentColor" stroke-width="1.2"></rect>
-            <text x="315" y="175" text-anchor="middle">normalized tool</text>
-            <text x="315" y="193" text-anchor="middle" opacity="0.6" font-size="11">schema + validated fn</text>
+            <text x="315" y="175" text-anchor="middle" data-i18n="diagram.normalized_tool">normalized tool</text>
+            <text x="315" y="193" text-anchor="middle" opacity="0.6" font-size="11" data-i18n="diagram.schema_validated">schema + validated fn</text>
 
             <!-- arrow to decision -->
             <line x1="400" y1="180" x2="458" y2="180" stroke="currentColor" stroke-width="1.2" marker-end="url(#arrow)"></line>
@@ -564,27 +672,27 @@ form.addEventListener(<span class="str">'submit'</span>, (e) =&gt; {
 
             <!-- YES path (accent) -->
             <line x1="580" y1="150" x2="700" y2="70" stroke="var(--accent)" stroke-width="1.4" marker-end="url(#arrow)"></line>
-            <text x="655" y="95" text-anchor="middle" font-size="11" fill="var(--accent)">yes</text>
+            <text x="655" y="95" text-anchor="middle" font-size="11" fill="var(--accent)" data-i18n="diagram.yes">yes</text>
 
             <rect x="700" y="30" width="200" height="60" rx="3" fill="none" stroke="var(--accent)" stroke-width="1.4"></rect>
-            <text x="800" y="55" text-anchor="middle" fill="var(--accent)">registerTool() on</text>
+            <text x="800" y="55" text-anchor="middle" fill="var(--accent)" data-i18n="diagram.register_on">registerTool() on</text>
             <text x="800" y="72" text-anchor="middle" fill="var(--accent)">document.modelContext</text>
 
             <line x1="800" y1="30" x2="800" y2="8" stroke="var(--accent)" stroke-width="1.4" marker-end="url(#arrow)"></line>
-            <text x="800" y="-2" text-anchor="middle" fill="var(--accent)" font-size="11">agent can call it</text>
+            <text x="800" y="-2" text-anchor="middle" fill="var(--accent)" font-size="11" data-i18n="diagram.agent_call">agent can call it</text>
 
             <!-- NO path (muted) -->
             <line x1="580" y1="210" x2="700" y2="290" stroke="currentColor" stroke-width="1.2" marker-end="url(#arrow)" opacity="0.75"></line>
-            <text x="655" y="270" text-anchor="middle" font-size="11" opacity="0.75">no</text>
+            <text x="655" y="270" text-anchor="middle" font-size="11" opacity="0.75" data-i18n="diagram.no">no</text>
 
             <rect x="700" y="300" width="200" height="60" rx="3" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.75"></rect>
             <text x="800" y="325" text-anchor="middle" opacity="0.85">console.warn() + no-op</text>
-            <text x="800" y="342" text-anchor="middle" opacity="0.6" font-size="11">page renders as usual</text>
+            <text x="800" y="342" text-anchor="middle" opacity="0.6" font-size="11" data-i18n="diagram.renders_usual">page renders as usual</text>
 
           </g>
         </svg>
       </div>
-      <figcaption>
+      <figcaption data-i18n="architecture.figcaption">
         Both <code>registerTool()</code> and the Declarative form path run the same
         <code>supportsWebMcp()</code> branch before touching the browser &mdash; the
         difference is only what happens at the two ends.
@@ -595,9 +703,9 @@ form.addEventListener(<span class="str">'submit'</span>, (e) =&gt; {
 
 <section id="testing">
   <div class="shell">
-    <p class="eyebrow">No browser required</p>
-    <h2>Test the tools you registered, not a re-implementation of them.</h2>
-    <p class="lede prose">
+    <p class="eyebrow" data-i18n="testing.eyebrow">No browser required</p>
+    <h2 data-i18n="testing.h2">Test the tools you registered, not a re-implementation of them.</h2>
+    <p class="lede prose" data-i18n="testing.lede">
       <code>createWebMcpMock()</code> stands in for <code>document.modelContext</code> in
       Node. <code>invokeTool()</code> runs the exact <code>execute</code> your tool was
       registered with &mdash; Zod parsing included.
@@ -617,27 +725,27 @@ registerYourTools();
 
 <section id="status">
   <div class="shell">
-    <p class="eyebrow">Where this actually stands</p>
-    <h2>Verified against a real browser, not just mocks.</h2>
-    <p class="lede prose">
+    <p class="eyebrow" data-i18n="status.eyebrow">Where this actually stands</p>
+    <h2 data-i18n="status.h2">Verified against a real browser, not just mocks.</h2>
+    <p class="lede prose" data-i18n="status.lede">
       WebMCP is still an origin trial. Every claim below was checked, not assumed.
     </p>
     <div class="status-grid">
       <div class="status-item">
-        <span class="k">Browser support</span>
-        <p>Chrome 149+, origin trial. Most visitors won't have it &mdash; that's what the fallback is for.</p>
+        <span class="k" data-i18n="status.item1_k">Browser support</span>
+        <p data-i18n="status.item1_p">Chrome 149+, origin trial. Most visitors won't have it &mdash; that's what the fallback is for.</p>
       </div>
       <div class="status-item">
-        <span class="k">Live-verified</span>
-        <p><code>executeTool()</code> ran a real registered handler and updated the DOM in an actual <code>document.modelContext</code>.</p>
+        <span class="k" data-i18n="status.item2_k">Live-verified</span>
+        <p data-i18n="status.item2_p"><code>executeTool()</code> ran a real registered handler and updated the DOM in an actual <code>document.modelContext</code>.</p>
       </div>
       <div class="status-item">
-        <span class="k">Declarative schema</span>
-        <p>The form &rarr; JSON&nbsp;Schema derivation is still unspecified upstream. This library sets the four fixed attributes and stops there &mdash; it doesn't guess.</p>
+        <span class="k" data-i18n="status.item3_k">Declarative schema</span>
+        <p data-i18n="status.item3_p">The form &rarr; JSON&nbsp;Schema derivation is still unspecified upstream. This library sets the four fixed attributes and stops there &mdash; it doesn't guess.</p>
       </div>
       <div class="status-item">
-        <span class="k">Runtime dependencies</span>
-        <p>One: <code>zod</code>. The library never imports it at runtime &mdash; it only calls methods on the schema you pass in.</p>
+        <span class="k" data-i18n="status.item4_k">Runtime dependencies</span>
+        <p data-i18n="status.item4_p">One: <code>zod</code>. The library never imports it at runtime &mdash; it only calls methods on the schema you pass in.</p>
       </div>
     </div>
   </div>
@@ -647,13 +755,226 @@ registerYourTools();
   <div class="shell">
     <div>
       <span class="brand" style="pointer-events:none;">fast<span>web</span>mcp</span>
-      <p class="foot-note" style="margin-top:0.6rem;">MIT licensed. Built with <a href="https://mauricioperera.github.io/KDD/" style="color:inherit;">KDD</a>.</p>
+      <p class="foot-note" style="margin-top:0.6rem;" data-i18n="footer.tagline">MIT licensed. Built with <a href="https://mauricioperera.github.io/KDD/" style="color:inherit;">KDD</a>.</p>
     </div>
     <nav class="foot-links">
       <a href="https://www.npmjs.com/package/fastwebmcp">npm</a>
       <a href="https://github.com/MauricioPerera/fastwebmcp">GitHub</a>
-      <a href="https://github.com/MauricioPerera/fastwebmcp/tree/main/examples">Examples</a>
-      <a href="https://github.com/MauricioPerera/fastwebmcp/blob/main/DEFINITION.md">Definition</a>
+      <a href="https://github.com/MauricioPerera/fastwebmcp/tree/main/examples" data-i18n="footer.examples">Examples</a>
+      <a href="https://github.com/MauricioPerera/fastwebmcp/blob/main/DEFINITION.md" data-i18n="footer.definition">Definition</a>
     </nav>
   </div>
 </footer>
+
+<script>
+(function () {
+  var I18N = {
+    en: {
+      'nav.why': 'Why',
+      'nav.how': 'How it works',
+      'nav.status': 'Status',
+      'lang.label': 'Language',
+      'theme.toggle': 'Toggle color theme',
+      'hero.h1': 'Give the browser its own <em>tool voice.</em>',
+      'hero.sub': 'fastwebmcp brings FastMCP-style ergonomics to <a href="https://github.com/webmachinelearning/webmcp">WebMCP</a>: typed Zod builders over the browser\'s Imperative and Declarative APIs &mdash; with a safe no-op fallback for the browsers (most of them, still) that don\'t speak <code>document.modelContext</code> yet.',
+      'hero.source': 'Source &#8599;',
+      'hero.callout': '&#8593; three attributes, set by <code>defineDeclarativeTool()</code> &mdash; not written by hand',
+      'compare.eyebrow': 'The gap',
+      'compare.h2': 'Raw WebMCP asks you to hand-write a JSON Schema and trust the input.',
+      'compare.lede': 'MCP had the same problem, until FastMCP made a Python type hint into a working tool definition. WebMCP is at that same point today &mdash; the official examples register tools with a schema typed out by hand and no validation between the browser and your function.',
+      'compare.bad': 'Without fastwebmcp',
+      'compare.good': 'With fastwebmcp',
+      'apis.eyebrow': 'Two surfaces',
+      'apis.h2': 'Register a function, or annotate a form &mdash; your call.',
+      'apis.lede': 'WebMCP ships two ways to expose a tool. fastwebmcp gives both the same validate-then-run discipline.',
+      'apis.imperative': 'Imperative',
+      'apis.declarative': 'Declarative',
+      'architecture.eyebrow': 'Mechanism',
+      'architecture.h2': 'One call, two outcomes &mdash; the page never breaks either way.',
+      'architecture.lede': 'Every registration path runs through the same check. If the browser can hear it, the agent gets a validated tool. If it can\'t, your page just renders &mdash; a warning in the console, nothing more.',
+      'architecture.figcaption': 'Both <code>registerTool()</code> and the Declarative form path run the same <code>supportsWebMcp()</code> branch before touching the browser &mdash; the difference is only what happens at the two ends.',
+      'diagram.aria': 'Diagram: a Zod spec passed to defineTool or defineDeclarativeTool becomes a normalized tool, which supportsWebMcp() routes down one of two paths. If WebMCP is supported, it registers with document.modelContext and an AI agent can call it. If not, it logs a console warning and no-ops, and the page continues to render normally for humans.',
+      'diagram.your_spec': 'your spec',
+      'diagram.zod_handler': 'zod + handler',
+      'diagram.normalized_tool': 'normalized tool',
+      'diagram.schema_validated': 'schema + validated fn',
+      'diagram.yes': 'yes',
+      'diagram.no': 'no',
+      'diagram.register_on': 'registerTool() on',
+      'diagram.agent_call': 'agent can call it',
+      'diagram.renders_usual': 'page renders as usual',
+      'testing.eyebrow': 'No browser required',
+      'testing.h2': 'Test the tools you registered, not a re-implementation of them.',
+      'testing.lede': '<code>createWebMcpMock()</code> stands in for <code>document.modelContext</code> in Node. <code>invokeTool()</code> runs the exact <code>execute</code> your tool was registered with &mdash; Zod parsing included.',
+      'status.eyebrow': 'Where this actually stands',
+      'status.h2': 'Verified against a real browser, not just mocks.',
+      'status.lede': 'WebMCP is still an origin trial. Every claim below was checked, not assumed.',
+      'status.item1_k': 'Browser support',
+      'status.item1_p': 'Chrome 149+, origin trial. Most visitors won\'t have it &mdash; that\'s what the fallback is for.',
+      'status.item2_k': 'Live-verified',
+      'status.item2_p': '<code>executeTool()</code> ran a real registered handler and updated the DOM in an actual <code>document.modelContext</code>.',
+      'status.item3_k': 'Declarative schema',
+      'status.item3_p': 'The form &rarr; JSON&nbsp;Schema derivation is still unspecified upstream. This library sets the four fixed attributes and stops there &mdash; it doesn\'t guess.',
+      'status.item4_k': 'Runtime dependencies',
+      'status.item4_p': 'One: <code>zod</code>. The library never imports it at runtime &mdash; it only calls methods on the schema you pass in.',
+      'footer.tagline': 'MIT licensed. Built with <a href="https://mauricioperera.github.io/KDD/" style="color:inherit;">KDD</a>.',
+      'footer.examples': 'Examples',
+      'footer.definition': 'Definition'
+    },
+    es: {
+      'nav.why': 'Por qué',
+      'nav.how': 'Cómo funciona',
+      'nav.status': 'Estado',
+      'lang.label': 'Idioma',
+      'theme.toggle': 'Cambiar tema de color',
+      'hero.h1': 'Dale al navegador su propia <em>voz de herramienta.</em>',
+      'hero.sub': 'fastwebmcp lleva la ergonomía de FastMCP a <a href="https://github.com/webmachinelearning/webmcp">WebMCP</a>: builders tipados con Zod sobre las APIs Imperativa y Declarativa del navegador &mdash; con un fallback seguro de no-op para los navegadores (la mayoría, todavía) que no hablan <code>document.modelContext</code>.',
+      'hero.source': 'Código &#8599;',
+      'hero.callout': '&#8593; tres atributos, seteados por <code>defineDeclarativeTool()</code> &mdash; no escritos a mano',
+      'compare.eyebrow': 'La brecha',
+      'compare.h2': 'WebMCP crudo te pide escribir un JSON Schema a mano y confiar en el input.',
+      'compare.lede': 'MCP tenía el mismo problema, hasta que FastMCP convirtió un type hint de Python en una definición de tool funcional. WebMCP está en ese mismo punto hoy &mdash; los ejemplos oficiales registran tools con un schema escrito a mano y sin validación entre el navegador y tu función.',
+      'compare.bad': 'Sin fastwebmcp',
+      'compare.good': 'Con fastwebmcp',
+      'apis.eyebrow': 'Dos superficies',
+      'apis.h2': 'Registrá una función, o anotá un formulario &mdash; vos decidís.',
+      'apis.lede': 'WebMCP trae dos formas de exponer una tool. fastwebmcp le da a ambas la misma disciplina de validar-antes-de-ejecutar.',
+      'apis.imperative': 'Imperativa',
+      'apis.declarative': 'Declarativa',
+      'architecture.eyebrow': 'Mecanismo',
+      'architecture.h2': 'Un llamado, dos resultados &mdash; la página nunca se rompe.',
+      'architecture.lede': 'Todo camino de registro pasa por el mismo chequeo. Si el navegador puede escucharlo, el agente recibe una tool validada. Si no puede, tu página simplemente se renderiza &mdash; una advertencia en la consola, nada más.',
+      'architecture.figcaption': 'Tanto <code>registerTool()</code> como el camino del formulario Declarativo corren la misma rama de <code>supportsWebMcp()</code> antes de tocar el navegador &mdash; la diferencia es solo qué pasa en los dos extremos.',
+      'diagram.aria': 'Diagrama: un spec de Zod pasado a defineTool o defineDeclarativeTool se convierte en una tool normalizada, que supportsWebMcp() enruta por uno de dos caminos. Si WebMCP está soportado, se registra con document.modelContext y un agente de IA puede llamarla. Si no, registra una advertencia en consola y no hace nada, y la página sigue renderizando normalmente para humanos.',
+      'diagram.your_spec': 'tu spec',
+      'diagram.zod_handler': 'zod + handler',
+      'diagram.normalized_tool': 'tool normalizada',
+      'diagram.schema_validated': 'schema + fn validada',
+      'diagram.yes': 'sí',
+      'diagram.no': 'no',
+      'diagram.register_on': 'registerTool() en',
+      'diagram.agent_call': 'el agente puede llamarla',
+      'diagram.renders_usual': 'la página renderiza normal',
+      'testing.eyebrow': 'Sin navegador',
+      'testing.h2': 'Testeá las tools que registraste, no una reimplementación de ellas.',
+      'testing.lede': '<code>createWebMcpMock()</code> reemplaza a <code>document.modelContext</code> en Node. <code>invokeTool()</code> corre el <code>execute</code> exacto con el que registraste tu tool &mdash; parseo de Zod incluido.',
+      'status.eyebrow': 'Dónde está esto realmente',
+      'status.h2': 'Verificado contra un navegador real, no solo mocks.',
+      'status.lede': 'WebMCP sigue siendo un origin trial. Cada afirmación de abajo fue verificada, no supuesta.',
+      'status.item1_k': 'Soporte de navegador',
+      'status.item1_p': 'Chrome 149+, origin trial. La mayoría de los visitantes no lo van a tener &mdash; para eso está el fallback.',
+      'status.item2_k': 'Verificado en vivo',
+      'status.item2_p': '<code>executeTool()</code> corrió un handler real registrado y actualizó el DOM en un <code>document.modelContext</code> real.',
+      'status.item3_k': 'Schema Declarativo',
+      'status.item3_p': 'La derivación de form &rarr; JSON&nbsp;Schema sigue sin especificarse en el spec original. Esta librería setea los cuatro atributos fijos y se detiene ahí &mdash; no adivina.',
+      'status.item4_k': 'Dependencias en runtime',
+      'status.item4_p': 'Una: <code>zod</code>. La librería nunca la importa en runtime &mdash; solo llama métodos sobre el schema que vos le pasás.',
+      'footer.tagline': 'Licencia MIT. Construido con <a href="https://mauricioperera.github.io/KDD/" style="color:inherit;">KDD</a>.',
+      'footer.examples': 'Ejemplos',
+      'footer.definition': 'Definición'
+    },
+    pt: {
+      'nav.why': 'Por quê',
+      'nav.how': 'Como funciona',
+      'nav.status': 'Status',
+      'lang.label': 'Idioma',
+      'theme.toggle': 'Alternar tema de cor',
+      'hero.h1': 'Dê ao navegador sua própria <em>voz de ferramenta.</em>',
+      'hero.sub': 'fastwebmcp traz a ergonomia do FastMCP para o <a href="https://github.com/webmachinelearning/webmcp">WebMCP</a>: builders tipados com Zod sobre as APIs Imperativa e Declarativa do navegador &mdash; com um fallback seguro de no-op para os navegadores (a maioria, ainda) que não falam <code>document.modelContext</code>.',
+      'hero.source': 'Código &#8599;',
+      'hero.callout': '&#8593; três atributos, definidos por <code>defineDeclarativeTool()</code> &mdash; não escritos à mão',
+      'compare.eyebrow': 'A lacuna',
+      'compare.h2': 'O WebMCP puro pede que você escreva um JSON Schema à mão e confie na entrada.',
+      'compare.lede': 'O MCP tinha o mesmo problema, até que o FastMCP transformou uma type hint do Python em uma definição de tool funcional. O WebMCP está nesse mesmo ponto hoje &mdash; os exemplos oficiais registram tools com um schema escrito à mão e sem validação entre o navegador e sua função.',
+      'compare.bad': 'Sem fastwebmcp',
+      'compare.good': 'Com fastwebmcp',
+      'apis.eyebrow': 'Duas superfícies',
+      'apis.h2': 'Registre uma função, ou anote um formulário &mdash; você decide.',
+      'apis.lede': 'O WebMCP traz duas formas de expor uma tool. O fastwebmcp dá às duas a mesma disciplina de validar-antes-de-executar.',
+      'apis.imperative': 'Imperativa',
+      'apis.declarative': 'Declarativa',
+      'architecture.eyebrow': 'Mecanismo',
+      'architecture.h2': 'Uma chamada, dois resultados &mdash; a página nunca quebra.',
+      'architecture.lede': 'Todo caminho de registro passa pela mesma verificação. Se o navegador consegue ouvir, o agente recebe uma tool validada. Se não consegue, sua página simplesmente renderiza &mdash; um aviso no console, nada mais.',
+      'architecture.figcaption': 'Tanto o <code>registerTool()</code> quanto o caminho do formulário Declarativo passam pelo mesmo branch de <code>supportsWebMcp()</code> antes de tocar o navegador &mdash; a diferença é só o que acontece nas duas pontas.',
+      'diagram.aria': 'Diagrama: um spec do Zod passado para defineTool ou defineDeclarativeTool se torna uma tool normalizada, que supportsWebMcp() encaminha por um de dois caminhos. Se o WebMCP for suportado, ela é registrada com document.modelContext e um agente de IA pode chamá-la. Se não for, ela registra um aviso no console e não faz nada, e a página continua renderizando normalmente para humanos.',
+      'diagram.your_spec': 'sua spec',
+      'diagram.zod_handler': 'zod + handler',
+      'diagram.normalized_tool': 'tool normalizada',
+      'diagram.schema_validated': 'schema + fn validada',
+      'diagram.yes': 'sim',
+      'diagram.no': 'não',
+      'diagram.register_on': 'registerTool() em',
+      'diagram.agent_call': 'o agente pode chamá-la',
+      'diagram.renders_usual': 'a página renderiza normalmente',
+      'testing.eyebrow': 'Sem navegador',
+      'testing.h2': 'Teste as tools que você registrou, não uma reimplementação delas.',
+      'testing.lede': '<code>createWebMcpMock()</code> substitui o <code>document.modelContext</code> no Node. <code>invokeTool()</code> executa o <code>execute</code> exato com o qual sua tool foi registrada &mdash; parsing do Zod incluído.',
+      'status.eyebrow': 'Onde isso realmente está',
+      'status.h2': 'Verificado contra um navegador real, não só mocks.',
+      'status.lede': 'O WebMCP ainda é um origin trial. Cada afirmação abaixo foi verificada, não suposta.',
+      'status.item1_k': 'Suporte de navegador',
+      'status.item1_p': 'Chrome 149+, origin trial. A maioria dos visitantes não vai ter &mdash; é para isso que serve o fallback.',
+      'status.item2_k': 'Verificado ao vivo',
+      'status.item2_p': '<code>executeTool()</code> executou um handler real registrado e atualizou o DOM em um <code>document.modelContext</code> real.',
+      'status.item3_k': 'Schema Declarativo',
+      'status.item3_p': 'A derivação de form &rarr; JSON&nbsp;Schema ainda não está especificada no spec original. Esta biblioteca define os quatro atributos fixos e para por aí &mdash; não chuta.',
+      'status.item4_k': 'Dependências em runtime',
+      'status.item4_p': 'Uma: <code>zod</code>. A biblioteca nunca a importa em runtime &mdash; só chama métodos no schema que você passa.',
+      'footer.tagline': 'Licença MIT. Construído com <a href="https://mauricioperera.github.io/KDD/" style="color:inherit;">KDD</a>.',
+      'footer.examples': 'Exemplos',
+      'footer.definition': 'Definição'
+    }
+  };
+
+  function detectLang() {
+    try {
+      var saved = localStorage.getItem('fastwebmcp:lang');
+      if (saved && I18N[saved]) return saved;
+    } catch (e) {}
+    var nav = (navigator.language || 'en').toLowerCase();
+    if (nav.indexOf('es') === 0) return 'es';
+    if (nav.indexOf('pt') === 0) return 'pt';
+    return 'en';
+  }
+
+  function applyLang(lang) {
+    var dict = I18N[lang] || I18N.en;
+    document.documentElement.setAttribute('lang', lang);
+    document.querySelectorAll('[data-i18n]').forEach(function (el) {
+      var key = el.getAttribute('data-i18n');
+      var val = dict[key];
+      if (val === undefined) return;
+      var attr = el.getAttribute('data-i18n-attr');
+      if (attr) {
+        el.setAttribute(attr, val.replace(/<[^>]+>/g, ''));
+      } else {
+        el.innerHTML = val;
+      }
+    });
+    document.querySelectorAll('[data-lang-btn]').forEach(function (btn) {
+      btn.setAttribute('aria-current', btn.getAttribute('data-lang-btn') === lang ? 'true' : 'false');
+    });
+    try { localStorage.setItem('fastwebmcp:lang', lang); } catch (e) {}
+  }
+
+  document.querySelectorAll('[data-lang-btn]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      applyLang(btn.getAttribute('data-lang-btn'));
+    });
+  });
+
+  applyLang(detectLang());
+
+  var themeToggle = document.getElementById('theme-toggle');
+  themeToggle.addEventListener('click', function () {
+    var current = document.documentElement.getAttribute('data-theme');
+    var effectiveDark = current ? current === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+    var next = effectiveDark ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    try { localStorage.setItem('fastwebmcp:theme', next); } catch (e) {}
+  });
+})();
+</script>
+</body>
+</html>
