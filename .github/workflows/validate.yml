@@ -60,7 +60,11 @@ on:
         default: 'test-coverage/scan'
       src_dir_secrets:
         type: string
-        default: 'src'
+        # 'src' is the template's own default (its example source lives there).
+        # fastwebmcp's real source is src_ts/ -- src/ is empty since
+        # init_project.py removed the Python examples; scanning it was a
+        # silent, always-green no-op. See docs/reports/CONTRACT-44-REPORT.md.
+        default: 'src_ts'
 
 jobs:
   validate:
@@ -143,8 +147,8 @@ jobs:
       - name: Run each contract's test_command
         run: python scripts/validate_test_commands.py ${{ inputs.contracts_dir || 'knowledge/contracts' }} .
 
-      - name: Scan for leaked secrets (src only — see knowledge/contracts/secret-scan-gate.md)
-        run: python scripts/scan_secrets.py ${{ inputs.src_dir_secrets || 'src' }}
+      - name: Scan for leaked secrets (src_ts/ — see knowledge/contracts/secret-scan-gate.md)
+        run: python scripts/scan_secrets.py ${{ inputs.src_dir_secrets || 'src_ts' }}
 
       # The suite runs twice on purpose (identical command): the second run
       # detects flaky tests / verifies determinism. See specs/CONTRACT-11-ci-windows-suite2x.md.
