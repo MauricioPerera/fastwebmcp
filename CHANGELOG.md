@@ -4,6 +4,21 @@ All notable changes to the KDD Template are documented here.
 
 ## Unreleased
 
+**Contract 50 — Bump a TypeScript 7 (compilador nativo Go)** ([C50-REPORT](docs/reports/CONTRACT-50-REPORT.md))
+
+CONTRACT-49 habia marcado el pin de `typescript` (`^5.7.3`, dos majors atras de
+`latest`) como "no urgente, requiere evaluacion deliberada" -- TypeScript 7 reescribe el
+compilador completo en Go (Project Corsa, GA 8 de julio de 2026). Evaluado a pedido del
+usuario: los breaking changes documentados del salto (defaults nuevos para `strict`,
+`module`, `types`, target ES5 eliminado, etc.) caen todos en la frontera 5.x->6.0, y el
+`tsconfig.json` de fastwebmcp ya fija a mano los 5 campos que cambian de default --
+ningun default nuevo altera nada real. Probado con `npm install --no-save` ANTES de
+tocar `package.json` (para poder abortar limpio): typecheck/test/build en verde contra
+TS7 real, y `dist/` comparado archivo por archivo contra el build con TS5.7.3 -- unica
+diferencia, estilo de comillas en imports/exports emitidos (`"..."` vs `'...'`), cero
+diferencias en `.d.ts`. Bump aplicado (`^5.7.3` -> `^7.0.2`). No publicado a npm ni
+taggeado -- pendiente de confirmacion explicita, ya que el bump si regenera `dist/`.
+
 **Contract 49 — .gitattributes para las estadisticas de lenguaje de GitHub** ([C49-REPORT](docs/reports/CONTRACT-49-REPORT.md))
 
 Un agente de auditoria (siguiendo el mismo flujo de CONTRACT-47/48) encontro, via
