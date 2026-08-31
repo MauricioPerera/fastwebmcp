@@ -4,6 +4,21 @@ All notable changes to the KDD Template are documented here.
 
 ## Unreleased
 
+**Contract 45 — Verificacion real de extremo a extremo (WebMCP + mcpwasm)** ([C45-REPORT](docs/reports/CONTRACT-45-REPORT.md))
+
+A pedido del usuario, verificacion pura contra los dos runtimes reales que
+`fastwebmcp` promete soportar, sin mocks en ningun extremo. Lado WebMCP: el paquete
+publicado (`fastwebmcp@0.2.0`), en el Chrome real del usuario, `registerTool()` +
+`executeTool()` reales. Lado mcpwasm (nunca antes probado contra un runtime real):
+`toMcpwasmSkillSource()` genero un `tool.js` real, servido con un `llms.txt` real, y
+corrido contra el CLI oficial `@rckflr/mcpwasm` hablando protocolo MCP genuino por
+stdio -- el host verifico el hash del skill, `tools/list` expuso el schema exacto
+derivado de Zod, y `tools/call` devolvio el resultado correcto computado por el
+sandbox QuickJS-wasm real (input deliberadamente nuevo, para descartar un valor
+hardcodeado). Sin bugs encontrados en ningun lado. No se automatizo en CI (depende de
+red y de un paquete de terceros) -- queda documentado como verificacion manual
+repetible.
+
 **Contract 44 — Gate de secretos apuntaba a un directorio vacio** ([C44-REPORT](docs/reports/CONTRACT-44-REPORT.md))
 
 El gate "Scan for leaked secrets" de la CI escaneaba `src/` por default -- el
