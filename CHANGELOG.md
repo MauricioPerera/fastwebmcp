@@ -4,6 +4,19 @@ All notable changes to the KDD Template are documented here.
 
 ## Unreleased
 
+**Contract 51 — sideEffects: false y requisito de Node para el dev local** ([C51-REPORT](docs/reports/CONTRACT-51-REPORT.md))
+
+Ronda 5 de auditoria ("seguimos con algo mas de fastwebmcp"), esta vez con dos chequeos
+directos en vez de otro agente de investigacion (rendimientos decrecientes tras 4
+rondas previas). `npm audit`: sin hallazgo. `package.json` no declaraba `sideEffects` --
+verificado con grep que `src_ts/` no tiene ningun efecto secundario a nivel de modulo
+(solo tres constantes puras), asi que se agrego `"sideEffects": false`, preciso y util
+para tree-shaking en bundlers downstream. Ademas, el README no explicaba que `npm test`
+necesita Node 23.6+ (ejecucion nativa de `.ts`, la misma razon por la que la CI corre en
+Node 24) -- distinto del `engines.node: ">=18"` que aplica a quien instala el paquete
+publicado, no a quien corre la suite local. Documentado. Verificado que ninguno de los
+dos cambios rompe nada: typecheck/test/build corridos DESPUES, no solo antes.
+
 **Contract 50 — Bump a TypeScript 7 (compilador nativo Go)** ([C50-REPORT](docs/reports/CONTRACT-50-REPORT.md))
 
 CONTRACT-49 habia marcado el pin de `typescript` (`^5.7.3`, dos majors atras de

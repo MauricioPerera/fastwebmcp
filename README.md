@@ -151,6 +151,11 @@ project-level work is tracked as numbered execution contracts under
 [`AGENTS.md`](AGENTS.md) and [`knowledge/index.md`](knowledge/index.md) if you're
 contributing or want the full methodology reference.
 
+Running the test suite locally (`npm test`) needs **Node.js 23.6+** — it relies on
+Node's native `.ts` execution (`node --test tests_ts/**/*.test.ts`), which is separate
+from the `engines.node: ">=18"` this package declares for consumers of the published
+`dist/` (plain compiled JS, no native `.ts` support needed there).
+
 ## License
 
 MIT — see [LICENSE](LICENSE).
