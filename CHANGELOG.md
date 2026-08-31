@@ -4,6 +4,17 @@ All notable changes to the KDD Template are documented here.
 
 ## Unreleased
 
+**Contract 44 — Gate de secretos apuntaba a un directorio vacio** ([C44-REPORT](docs/reports/CONTRACT-44-REPORT.md))
+
+El gate "Scan for leaked secrets" de la CI escaneaba `src/` por default -- el
+directorio de ejemplos Python de la plantilla, vacio desde hace muchos contratos. El
+codigo real vive en `src_ts/`, nunca escaneado: `scan_secrets.py src` daba exit 0 sobre
+un directorio vacio, verde silencioso. Redirigido a `src_ts/`. Verificado con el camino
+positivo primero (secreto falso plantado y detectado, exit 1) antes de confiar en que
+el codigo real esta limpio (exit 0) -- un exit 0 sin esa prueba previa no distingue
+"escaneo y no encontro nada" de "no escaneo nada", el mismo bug que se corrige. Corrida
+real de CI verde.
+
 **Contract 43 — Conectar la CI real de TypeScript** ([C43-REPORT](docs/reports/CONTRACT-43-REPORT.md))
 
 `.github/workflows/validate.yml` nunca corria nada de TypeScript: el paso placeholder
