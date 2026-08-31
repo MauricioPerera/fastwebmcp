@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>
+  (function () {
+    try {
+      var saved = localStorage.getItem('fastwebmcp:theme');
+      if (saved === 'light' || saved === 'dark') {
+        document.documentElement.setAttribute('data-theme', saved);
+      }
+    } catch (e) {}
+  })();
+</script>
+<title>fastwebmcp — API Reference</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #14181a;
+    --ink-soft: #3a4442;
+    --paper: #f3f4f1;
+    --surface: #e7e9e2;
+    --surface-line: #cfd3c9;
+    --accent: #d94f26;
+    --accent-ink: #fdf4ee;
+    --structure: #1f5a5b;
+    --structure-soft: #dbe9e6;
+    --muted: #5c6a66;
+    --code-ink: #1c2624;
+
+    --font-display: "Newsreader", Georgia, "Times New Roman", serif;
+    --font-body: "IBM Plex Sans", -apple-system, "Segoe UI", sans-serif;
+    --font-mono: "IBM Plex Mono", "SF Mono", Consolas, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #ecefe9;
+      --ink-soft: #b7c0bb;
+      --paper: #101513;
+      --surface: #1a2321;
+      --surface-line: #2c3634;
+      --accent: #f2814f;
+      --accent-ink: #2a140c;
+      --structure: #5fb3ac;
+      --structure-soft: #15302d;
+      --muted: #93a19c;
+      --code-ink: #dbe6e3;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ink: #ecefe9;
+    --ink-soft: #b7c0bb;
+    --paper: #101513;
+    --surface: #1a2321;
+    --surface-line: #2c3634;
+    --accent: #f2814f;
+    --accent-ink: #2a140c;
+    --structure: #5fb3ac;
+    --structure-soft: #15302d;
+    --muted: #93a19c;
+    --code-ink: #dbe6e3;
+  }
+
+  * { box-sizing: border-box; min-width: 0; }
+  html { scroll-behavior: smooth; }
+  html, body { max-width: 100%; overflow-x: hidden; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 17px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  }
+
+  a { color: var(--accent); text-decoration-thickness: 1.5px; text-underline-offset: 3px; }
+  a:focus-visible, button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  h1, h2, h3 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    text-wrap: balance;
+    margin: 0;
+    color: var(--ink);
+  }
+
+  code, .mono { font-family: var(--font-mono); }
+
+  pre {
+    font-family: var(--font-mono);
+    font-size: 0.86rem;
+    line-height: 1.65;
+    margin: 0;
+    overflow-x: auto;
+    color: var(--code-ink);
+  }
+  pre .kw { color: var(--structure); }
+  pre .str { color: var(--accent); }
+  pre .com { color: var(--muted); font-style: italic; }
+
+  .code-panel {
+    background: var(--surface);
+    border: 1px solid var(--surface-line);
+    border-radius: 3px;
+    padding: 1.1rem 1.25rem;
+    max-width: 100%;
+  }
+
+  /* ---------- Nav ---------- */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: color-mix(in srgb, var(--paper) 88%, transparent);
+    backdrop-filter: blur(6px);
+    border-bottom: 1px solid var(--surface-line);
+  }
+  .topbar-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    height: 3.6rem;
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 clamp(1.25rem, 4vw, 3rem);
+  }
+  .brand {
+    font-family: var(--font-mono);
+    font-weight: 600;
+    font-size: 1rem;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+    text-decoration: none;
+    flex-shrink: 0;
+  }
+  .brand span { color: var(--accent); }
+  .topbar-right { display: flex; align-items: center; gap: 1.25rem; min-width: 0; }
+  .home-link {
+    font-family: var(--font-mono);
+    font-size: 0.86rem;
+    color: var(--ink-soft);
+    text-decoration: none;
+  }
+  .home-link:hover { color: var(--accent); }
+
+  .lang-switch {
+    display: flex;
+    gap: 0.15rem;
+    font-family: var(--font-mono);
+    font-size: 0.76rem;
+    border: 1px solid var(--surface-line);
+    border-radius: 3px;
+    padding: 0.2rem;
+    flex-shrink: 0;
+  }
+  .lang-switch button {
+    background: none;
+    border: none;
+    color: var(--muted);
+    padding: 0.2rem 0.45rem;
+    border-radius: 2px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: inherit;
+  }
+  .lang-switch button[aria-current="true"] { background: var(--ink); color: var(--paper); }
+
+  .theme-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border: 1px solid var(--surface-line);
+    border-radius: 3px;
+    background: none;
+    color: var(--ink);
+    cursor: pointer;
+    flex-shrink: 0;
+    padding: 0;
+  }
+  .theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
+  .theme-toggle svg { width: 1.05rem; height: 1.05rem; }
+  .icon-sun { display: block; }
+  .icon-moon { display: none; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .icon-sun { display: none; }
+    :root:not([data-theme="light"]) .icon-moon { display: block; }
+  }
+  :root[data-theme="dark"] .icon-sun { display: none; }
+  :root[data-theme="dark"] .icon-moon { display: block; }
+  :root[data-theme="light"] .icon-sun { display: block; }
+  :root[data-theme="light"] .icon-moon { display: none; }
+
+  /* ---------- Docs layout ---------- */
+  .docs-shell {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: clamp(2rem, 5vw, 3rem) clamp(1.25rem, 4vw, 3rem) 6rem;
+  }
+  .docs-intro { max-width: 62ch; margin-bottom: 2.5rem; }
+  .docs-intro .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--structure);
+    display: flex;
+    align-items: center;
+    gap: 0.6em;
+  }
+  .docs-intro .eyebrow::before { content: ""; width: 1.6em; height: 1px; background: var(--structure); display: inline-block; }
+  .docs-intro h1 { font-size: clamp(2rem, 4vw, 2.6rem); margin-top: 0.75rem; }
+  .docs-intro p { margin-top: 1rem; color: var(--ink-soft); font-size: 1.05rem; }
+
+  .docs-layout {
+    display: grid;
+    grid-template-columns: 220px minmax(0, 1fr);
+    gap: clamp(2rem, 4vw, 3.5rem);
+    align-items: start;
+  }
+  @media (max-width: 860px) {
+    .docs-layout { grid-template-columns: minmax(0, 1fr); }
+  }
+
+  .docs-sidebar {
+    position: sticky;
+    top: 4.8rem;
+    font-family: var(--font-mono);
+    font-size: 0.84rem;
+  }
+  @media (max-width: 860px) {
+    .docs-sidebar {
+      position: static;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem 1rem;
+      margin-bottom: 2rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--surface-line);
+    }
+    .docs-sidebar .group-label { display: none; }
+  }
+  .docs-sidebar .group-label {
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.7rem;
+    color: var(--structure);
+    margin: 1.1rem 0 0.4rem;
+  }
+  .docs-sidebar .group-label:first-child { margin-top: 0; }
+  .docs-sidebar a {
+    display: block;
+    color: var(--ink-soft);
+    text-decoration: none;
+    padding: 0.15rem 0;
+  }
+  .docs-sidebar a:hover { color: var(--accent); }
+
+  .fn-section { padding: 2.25rem 0; border-top: 1px solid var(--surface-line); scroll-margin-top: 4.8rem; }
+  .fn-section:first-of-type { border-top: none; padding-top: 0; }
+  .fn-section h2 { font-size: clamp(1.4rem, 2.6vw, 1.75rem); font-family: var(--font-mono); font-weight: 600; }
+  .fn-signature {
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    background: var(--surface);
+    border: 1px solid var(--surface-line);
+    border-radius: 3px;
+    padding: 0.75rem 1rem;
+    margin: 1rem 0;
+    overflow-x: auto;
+    color: var(--code-ink);
+  }
+  .fn-section > p.desc { margin: 1rem 0 0; max-width: 62ch; color: var(--ink-soft); }
+
+  .fn-meta-label {
+    font-family: var(--font-mono);
+    font-size: 0.76rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--structure);
+    display: block;
+    margin: 1.5rem 0 0.6rem;
+  }
+
+  .param-table { width: 100%; border-collapse: collapse; font-size: 0.92rem; max-width: 62ch; }
+  .param-table th, .param-table td { text-align: left; padding: 0.5rem 0.9rem 0.5rem 0; border-bottom: 1px solid var(--surface-line); vertical-align: top; }
+  .param-table th { font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 500; }
+  .param-table code { font-size: 0.88rem; }
+  .param-table td.pdesc { color: var(--ink-soft); }
+
+  ul.invariants { margin: 0; padding-left: 1.15rem; max-width: 62ch; }
+  ul.invariants li { margin: 0.35rem 0; color: var(--ink-soft); }
+
+  footer { border-top: 1px solid var(--surface-line); padding: 2.5rem clamp(1.25rem, 4vw, 3rem) 3.5rem; }
+  footer .inner { max-width: 1180px; margin: 0 auto; font-size: 0.84rem; color: var(--muted); font-family: var(--font-mono); }
+  footer a { color: inherit; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html">fast<span>web</span>mcp</a>
+    <div class="topbar-right">
+      <a class="home-link" href="index.html" data-i18n="nav.home">&larr; Home</a>
+      <div class="lang-switch" role="group" data-i18n="lang.label" data-i18n-attr="aria-label" aria-label="Language">
+        <button type="button" data-lang-btn="en">EN</button>
+        <button type="button" data-lang-btn="es">ES</button>
+        <button type="button" data-lang-btn="pt">PT</button>
+      </div>
+      <button type="button" class="theme-toggle" id="theme-toggle" data-i18n="theme.toggle" data-i18n-attr="aria-label" aria-label="Toggle color theme">
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.5v2.4M12 19.1v2.4M4.4 4.4l1.7 1.7M17.9 17.9l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.4 19.6l1.7-1.7M17.9 6.1l1.7-1.7"></path></svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a6.8 6.8 0 0 0 10.5 10.5Z"></path></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="docs-shell">
+  <div class="docs-intro">
+    <p class="eyebrow" data-i18n="docs.eyebrow">API Reference</p>
+    <h1 data-i18n="docs.h1">Every export, in detail.</h1>
+    <p data-i18n="docs.lede">
+      Seven functions, all of it. Signatures, parameters, return values, what throws and
+      when, and a real example for each &mdash; several of them the exact code verified
+      against a real browser and the real mcpwasm sandbox.
+    </p>
+  </div>
+
+  <div class="docs-layout">
+    <nav class="docs-sidebar" aria-label="API sections">
+      <span class="group-label" data-i18n="docs.group_imperative">Imperative</span>
+      <a href="#supportsWebMcp">supportsWebMcp()</a>
+      <a href="#defineTool">defineTool()</a>
+      <a href="#registerTool">registerTool()</a>
+      <span class="group-label" data-i18n="docs.group_declarative">Declarative</span>
+      <a href="#defineDeclarativeTool">defineDeclarativeTool()</a>
+      <a href="#respondToAgentSubmit">respondToAgentSubmit()</a>
+      <span class="group-label" data-i18n="docs.group_testing">Testing</span>
+      <a href="#createWebMcpMock">createWebMcpMock()</a>
+      <span class="group-label" data-i18n="docs.group_mcpwasm">mcpwasm</span>
+      <a href="#toMcpwasmSkillSource">toMcpwasmSkillSource()</a>
+    </nav>
+
+    <main>
+
+      <section class="fn-section" id="supportsWebMcp">
+        <h2>supportsWebMcp()</h2>
+        <div class="fn-signature">function supportsWebMcp(): boolean</div>
+        <p class="desc" data-i18n="fn.supportsWebMcp.desc">
+          Pure feature detection. Returns <code>true</code> only when
+          <code>document.modelContext</code> exists and is a non-null object. Every other
+          function here that touches the browser calls this first &mdash; you'll rarely
+          need to call it yourself unless you're branching your own UI on WebMCP support.
+        </p>
+
+        <span class="fn-meta-label" data-i18n="docs.label_params">Parameters</span>
+        <p data-i18n="fn.supportsWebMcp.params">None.</p>
+
+        <span class="fn-meta-label" data-i18n="docs.label_returns">Returns</span>
+        <p data-i18n="fn.supportsWebMcp.returns"><code>boolean</code> &mdash; <code>true</code> if this browser supports WebMCP.</p>
+
+        <span class="fn-meta-label" data-i18n="docs.label_invariants">Invariants</span>
+        <ul class="invariants">
+          <li data-i18n="fn.supportsWebMcp.inv1">Never throws, regardless of <code>document</code>'s shape &mdash; missing, <code>null</code>, not an object, or anything else.</li>
+        </ul>
+
+        <span class="fn-meta-label" data-i18n="docs.label_example">Example</span>
+        <div class="code-panel">
+<pre><span class="kw">if</span> (supportsWebMcp()) {
+  console.log(<span class="str">'This browser can register WebMCP tools.'</span>);
+}</pre>
+        </div>
+      </section>
+
+      <section class="fn-section" id="defineTool">
+        <h2>defineTool(spec)</h2>
+        <div class="fn-signature">function defineTool&lt;TSchema extends ZodType&gt;(spec: ToolSpec&lt;TSchema&gt;): DefinedTool</div>
+        <p class="desc" data-i18n="fn.defineTool.desc">
+          Validates and normalizes a tool definition. Derives the JSON Schema from your
+          Zod <code>inputSchema</code>, and wraps <code>execute</code> so every call is
+          parsed against that schema before your handler runs. Pure &mdash; it never
+          touches <code>document.modelContext</code> itself.
+        </p>
+
+        <span class="fn-meta-label" data-i18n="docs.label_params">Parameters</span>
+        <table class="param-table">
+          <tr><th data-i18n="docs.col_name">Name</th><th data-i18n="docs.col_type">Type</th><th data-i18n="docs.col_desc">Description</th></tr>
+          <tr><td><code>spec.name</code></td><td><code>string</code></td><td class="pdesc" data-i18n="fn.defineTool.p_name">Non-empty tool name.</td></tr>
+          <tr><td><code>spec.description</code></td><td><code>string</code></td><td class="pdesc" data-i18n="fn.defineTool.p_desc">Non-empty description shown to the agent.</td></tr>
+          <tr><td><code>spec.inputSchema</code></td><td><code>ZodType</code></td><td class="pdesc" data-i18n="fn.defineTool.p_schema">A Zod schema describing the tool's input.</td></tr>
+          <tr><td><code>spec.execute</code></td><td><code>(input, ctx) =&gt; unknown</code></td><td class="pdesc" data-i18n="fn.defineTool.p_execute">Your handler. Receives the parsed, typed input and <code>{ signal: AbortSignal }</code>.</td></tr>
+        </table>
+
+        <span class="fn-meta-label" data-i18n="docs.label_returns">Returns</span>
+        <p data-i18n="fn.defineTool.returns"><code>DefinedTool</code> &mdash; <code>{ name, description, inputSchema, execute }</code>, with <code>inputSchema</code> as JSON Schema and <code>execute</code> wrapped and async.</p>
+
+        <span class="fn-meta-label" data-i18n="docs.label_throws">Throws</span>
+        <ul class="invariants">
+          <li data-i18n="fn.defineTool.throws1">Synchronously, before doing anything else, if <code>name</code> or <code>description</code> is empty or not a string, or <code>execute</code> is not a function.</li>
+        </ul>
+
+        <span class="fn-meta-label" data-i18n="docs.label_example">Example</span>
+        <div class="code-panel">
+<pre><span class="kw">const</span> tool = defineTool({
+  name: <span class="str">'add_todo'</span>,
+  description: <span class="str">'Add a todo item to the list.'</span>,
+  inputSchema: z.object({ text: z.string().min(1) }),
+  execute: <span class="kw">async</span> ({ text }) =&gt; <span class="str">`Added: ${text}`</span>,
+});</pre>
+        </div>
+      </section>
+
+      <section class="fn-section" id="registerTool">
+        <h2>registerTool(spec, options?)</h2>
+        <div class="fn-signature">function registerTool&lt;TSchema extends ZodType&gt;(spec: ToolSpec&lt;TSchema&gt;, options?: RegisterToolOptions): boolean</div>
+        <p class="desc" data-i18n="fn.registerTool.desc">
+          The entry point most code calls. Always validates via <code>defineTool</code>
+          first &mdash; a broken spec throws immediately, whether or not the browser
+          supports WebMCP, because a bug in your spec isn't something the fallback should
+          hide. Then checks <code>supportsWebMcp()</code>: if unsupported, logs a
+          <code>console.warn</code> naming the tool and returns <code>false</code> without
+          touching the browser; if supported, calls
+          <code>document.modelContext.registerTool(tool, options)</code> and returns
+          <code>true</code>.
+        </p>
+
+        <span class="fn-meta-label" data-i18n="docs.label_params">Parameters</span>
+        <table class="param-table">
+          <tr><th data-i18n="docs.col_name">Name</th><th data-i18n="docs.col_type">Type</th><th data-i18n="docs.col_desc">Description</th></tr>
+          <tr><td><code>spec</code></td><td><code>ToolSpec&lt;TSchema&gt;</code></td><td class="pdesc" data-i18n="fn.registerTool.p_spec">Same shape as <code>defineTool</code>'s parameter.</td></tr>
+          <tr><td><code>options.signal</code></td><td><code>AbortSignal?</code></td><td class="pdesc" data-i18n="fn.registerTool.p_signal">Lets the browser unregister the tool later.</td></tr>
+          <tr><td><code>options.exposedTo</code></td><td><code>string[]?</code></td><td class="pdesc" data-i18n="fn.registerTool.p_exposed">Secure origins allowed cross-origin access.</td></tr>
+        </table>
+
+        <span class="fn-meta-label" data-i18n="docs.label_returns">Returns</span>
+        <p data-i18n="fn.registerTool.returns"><code>boolean</code> &mdash; <code>true</code> if actually registered with the browser, <code>false</code> if it no-opped.</p>
+
+        <span class="fn-meta-label" data-i18n="docs.label_throws">Throws</span>
+        <ul class="invariants">
+          <li data-i18n="fn.registerTool.throws1">Same as <code>defineTool</code> &mdash; an invalid spec throws regardless of browser support.</li>
+        </ul>
+
+        <span class="fn-meta-label" data-i18n="docs.label_example">Example</span>
+        <div class="code-panel">
+<pre><span class="kw">const</span> registered = registerTool({
+  name: <span class="str">'add_todo'</span>,
+  description: <span class="str">'Add a todo item to the list.'</span>,
+  inputSchema: z.object({ text: z.string().min(1) }),
+  execute: <span class="kw">async</span> ({ text }) =&gt; <span class="str">`Added: ${text}`</span>,
+});
+<span class="com">// registered === false on a browser without WebMCP -- the page still works</span></pre>
+        </div>
+      </section>
+
+      <section class="fn-section" id="defineDeclarativeTool">
+        <h2>defineDeclarativeTool(form, spec)</h2>
+        <div class="fn-signature">function defineDeclarativeTool(form: DeclarativeFormElementLike, spec: DeclarativeToolSpec): void</div>
+        <p class="desc" data-i18n="fn.defineDeclarativeTool.desc">
+          Sets the four attributes the WebMCP Declarative API explainer defines directly
+          on a <code>&lt;form&gt;</code>: <code>toolname</code>, <code>tooldescription</code>,
+          <code>toolautosubmit</code> (presence-only), and <code>toolparamdescription</code>
+          on the matching field elements.
+        </p>
+
+        <span class="fn-meta-label" data-i18n="docs.label_params">Parameters</span>
+        <table class="param-table">
+          <tr><th data-i18n="docs.col_name">Name</th><th data-i18n="docs.col_type">Type</th><th data-i18n="docs.col_desc">Description</th></tr>
+          <tr><td><code>form</code></td><td><code>DeclarativeFormElementLike</code></td><td class="pdesc" data-i18n="fn.defineDeclarativeTool.p_form">A form element (or anything with <code>setAttribute</code> and an <code>elements</code> collection).</td></tr>
+          <tr><td><code>spec.name</code> / <code>description</code></td><td><code>string</code></td><td class="pdesc" data-i18n="fn.defineDeclarativeTool.p_namedesc">Same rules as <code>defineTool</code>.</td></tr>
+          <tr><td><code>spec.autoSubmit</code></td><td><code>boolean?</code></td><td class="pdesc" data-i18n="fn.defineDeclarativeTool.p_auto">Sets <code>toolautosubmit</code> when <code>true</code>.</td></tr>
+          <tr><td><code>spec.fields</code></td><td><code>{name,description}[]?</code></td><td class="pdesc" data-i18n="fn.defineDeclarativeTool.p_fields">Matched against <code>form.elements</code> by <code>name</code>.</td></tr>
+        </table>
+
+        <span class="fn-meta-label" data-i18n="docs.label_returns">Returns</span>
+        <p data-i18n="fn.defineDeclarativeTool.returns"><code>void</code> &mdash; it mutates the form in place.</p>
+
+        <span class="fn-meta-label" data-i18n="docs.label_throws">Throws</span>
+        <ul class="invariants">
+          <li data-i18n="fn.defineDeclarativeTool.throws1">Same fail-fast as <code>defineTool</code> for <code>name</code>/<code>description</code>.</li>
+          <li data-i18n="fn.defineDeclarativeTool.throws2">If a field name in <code>spec.fields</code> has no matching control in <code>form.elements</code>.</li>
+        </ul>
+
+        <span class="fn-meta-label" data-i18n="docs.label_example">Example</span>
+        <div class="code-panel">
+<pre>defineDeclarativeTool(form, {
+  name: <span class="str">'submit_support_request'</span>,
+  description: <span class="str">'Submit a request for support.'</span>,
+  fields: [{ name: <span class="str">'topic'</span>, description: <span class="str">'Determines what team this routes to.'</span> }],
+});</pre>
+        </div>
+      </section>
+
+      <section class="fn-section" id="respondToAgentSubmit">
+        <h2>respondToAgentSubmit(event, handler)</h2>
+        <div class="fn-signature">function respondToAgentSubmit(event: AgentSubmitEventLike, handler: (event) =&gt; unknown): boolean</div>
+        <p class="desc" data-i18n="fn.respondToAgentSubmit.desc">
+          The Declarative-side counterpart to <code>defineTool</code>'s wrapped
+          <code>execute</code>. Checks <code>event.agentInvoked</code>; if
+          <code>false</code> (a human submitted the form), it does nothing and your
+          normal submit handling runs. If <code>true</code>, it calls your handler and
+          forwards the result &mdash; or a synchronous throw, turned into a rejection
+          &mdash; to <code>event.respondWith()</code>.
+        </p>
+
+        <span class="fn-meta-label" data-i18n="docs.label_params">Parameters</span>
+        <table class="param-table">
+          <tr><th data-i18n="docs.col_name">Name</th><th data-i18n="docs.col_type">Type</th><th data-i18n="docs.col_desc">Description</th></tr>
+          <tr><td><code>event</code></td><td><code>AgentSubmitEventLike</code></td><td class="pdesc" data-i18n="fn.respondToAgentSubmit.p_event">The <code>SubmitEvent</code>, with <code>agentInvoked</code>/<code>respondWith</code> per the explainer.</td></tr>
+          <tr><td><code>handler</code></td><td><code>(event) =&gt; unknown</code></td><td class="pdesc" data-i18n="fn.respondToAgentSubmit.p_handler">Receives the event, runs sync or async.</td></tr>
+        </table>
+
+        <span class="fn-meta-label" data-i18n="docs.label_returns">Returns</span>
+        <p data-i18n="fn.respondToAgentSubmit.returns"><code>boolean</code> &mdash; <code>true</code> if the submit was agent-invoked and handled, <code>false</code> otherwise.</p>
+
+        <span class="fn-meta-label" data-i18n="docs.label_example">Example</span>
+        <div class="code-panel">
+<pre>form.addEventListener(<span class="str">'submit'</span>, (event) =&gt; {
+  event.preventDefault();
+  <span class="kw">const</span> handled = respondToAgentSubmit(event, () =&gt; ({ status: <span class="str">'submitted'</span> }));
+  <span class="kw">if</span> (!handled) {
+    <span class="com">// a human submitted -- handle it however you normally would</span>
+  }
+});</pre>
+        </div>
+      </section>
+
+      <section class="fn-section" id="createWebMcpMock">
+        <h2>createWebMcpMock()</h2>
+        <div class="fn-signature">function createWebMcpMock(): WebMcpMock</div>
+        <p class="desc" data-i18n="fn.createWebMcpMock.desc">
+          A testing harness. Returns a <code>document</code>-shaped object you can assign
+          to <code>globalThis.document</code>, plus <code>invokeTool()</code> to call a
+          registered tool the same way a real agent would &mdash; running the exact
+          <code>execute</code> your tool was registered with, not a reimplementation.
+        </p>
+
+        <span class="fn-meta-label" data-i18n="docs.label_params">Parameters</span>
+        <p data-i18n="fn.createWebMcpMock.params">None.</p>
+
+        <span class="fn-meta-label" data-i18n="docs.label_returns">Returns</span>
+        <p data-i18n="fn.createWebMcpMock.returns"><code>WebMcpMock</code> &mdash; <code>{ document, registeredTools, invokeTool(name, input, context?) }</code>.</p>
+
+        <span class="fn-meta-label" data-i18n="docs.label_invariants">Invariants</span>
+        <ul class="invariants">
+          <li data-i18n="fn.createWebMcpMock.inv1"><code>invokeTool</code> rejects with a clear error if no tool is registered under that name.</li>
+          <li data-i18n="fn.createWebMcpMock.inv2">Defaults <code>context.signal</code> to a fresh <code>AbortSignal</code> if you don't provide one.</li>
+        </ul>
+
+        <span class="fn-meta-label" data-i18n="docs.label_example">Example</span>
+        <div class="code-panel">
+<pre><span class="kw">const</span> mock = createWebMcpMock();
+globalThis.document = mock.document;
+
+registerYourTools();
+
+<span class="kw">const</span> result = <span class="kw">await</span> mock.invokeTool(<span class="str">'add_todo'</span>, { text: <span class="str">'Buy milk'</span> });</pre>
+        </div>
+      </section>
+
+      <section class="fn-section" id="toMcpwasmSkillSource">
+        <h2>toMcpwasmSkillSource(tool, options?)</h2>
+        <div class="fn-signature">function toMcpwasmSkillSource(tool: DefinedTool, options?: McpwasmSkillOptions): string</div>
+        <p class="desc" data-i18n="fn.toMcpwasmSkillSource.desc">
+          Reuses the schema a <code>DefinedTool</code> already carries to emit the
+          <code>registerTool({...})</code> source a real
+          <a href="https://github.com/MauricioPerera/mcpwasm">mcpwasm</a> <code>tool.js</code>
+          expects &mdash; verified against the real mcpwasm sandbox, not just checked for
+          valid syntax. Schema-only: it never tries to translate <code>execute</code>,
+          which exists to touch a DOM the sandbox doesn't have.
+        </p>
+
+        <span class="fn-meta-label" data-i18n="docs.label_params">Parameters</span>
+        <table class="param-table">
+          <tr><th data-i18n="docs.col_name">Name</th><th data-i18n="docs.col_type">Type</th><th data-i18n="docs.col_desc">Description</th></tr>
+          <tr><td><code>tool</code></td><td><code>DefinedTool</code></td><td class="pdesc" data-i18n="fn.toMcpwasmSkillSource.p_tool">The output of <code>defineTool()</code>.</td></tr>
+          <tr><td><code>options.handlerBody</code></td><td><code>string?</code></td><td class="pdesc" data-i18n="fn.toMcpwasmSkillSource.p_body">Raw JS text for the sandboxed handler's body; defaults to a <code>TODO</code> stub naming the sandbox's constraints.</td></tr>
+        </table>
+
+        <span class="fn-meta-label" data-i18n="docs.label_returns">Returns</span>
+        <p data-i18n="fn.toMcpwasmSkillSource.returns"><code>string</code> &mdash; the <code>tool.js</code> source text.</p>
+
+        <span class="fn-meta-label" data-i18n="docs.label_example">Example</span>
+        <p class="desc" data-i18n="fn.toMcpwasmSkillSource.example_note" style="margin-top:0.5rem;">
+          The exact code verified end-to-end against the real mcpwasm CLI &mdash; see the
+          <a href="index.html#status">status section</a>.
+        </p>
+        <div class="code-panel">
+<pre><span class="kw">const</span> tool = defineTool({
+  name: <span class="str">'e2e_sum'</span>,
+  description: <span class="str">'Sum two numbers a and b.'</span>,
+  inputSchema: z.object({ a: z.number(), b: z.number() }),
+  execute: <span class="kw">async</span> ({ a, b }) =&gt; a + b, <span class="com">// browser-only, never auto-translated</span>
+});
+
+toMcpwasmSkillSource(tool, {
+  handlerBody: <span class="str">'return Number(args.a) + Number(args.b);'</span>,
+});</pre>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<footer>
+  <div class="inner">
+    <span data-i18n="footer.back_prefix">Back to</span> <a href="index.html">fastwebmcp</a> &middot; <a href="https://github.com/MauricioPerera/fastwebmcp">GitHub</a> &middot; <a href="https://www.npmjs.com/package/fastwebmcp">npm</a>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var I18N = {
+    en: {
+      'nav.home': '&larr; Home',
+      'lang.label': 'Language',
+      'theme.toggle': 'Toggle color theme',
+      'docs.eyebrow': 'API Reference',
+      'docs.h1': 'Every export, in detail.',
+      'docs.lede': 'Seven functions, all of it. Signatures, parameters, return values, what throws and when, and a real example for each &mdash; several of them the exact code verified against a real browser and the real mcpwasm sandbox.',
+      'docs.group_imperative': 'Imperative',
+      'docs.group_declarative': 'Declarative',
+      'docs.group_testing': 'Testing',
+      'docs.group_mcpwasm': 'mcpwasm',
+      'docs.label_params': 'Parameters',
+      'docs.label_returns': 'Returns',
+      'docs.label_throws': 'Throws',
+      'docs.label_invariants': 'Invariants',
+      'docs.label_example': 'Example',
+      'docs.col_name': 'Name',
+      'docs.col_type': 'Type',
+      'docs.col_desc': 'Description',
+      'footer.back_prefix': 'Back to',
+      'fn.supportsWebMcp.desc': 'Pure feature detection. Returns <code>true</code> only when <code>document.modelContext</code> exists and is a non-null object. Every other function here that touches the browser calls this first &mdash; you\'ll rarely need to call it yourself unless you\'re branching your own UI on WebMCP support.',
+      'fn.supportsWebMcp.params': 'None.',
+      'fn.supportsWebMcp.returns': '<code>boolean</code> &mdash; <code>true</code> if this browser supports WebMCP.',
+      'fn.supportsWebMcp.inv1': 'Never throws, regardless of <code>document</code>\'s shape &mdash; missing, <code>null</code>, not an object, or anything else.',
+      'fn.defineTool.desc': 'Validates and normalizes a tool definition. Derives the JSON Schema from your Zod <code>inputSchema</code>, and wraps <code>execute</code> so every call is parsed against that schema before your handler runs. Pure &mdash; it never touches <code>document.modelContext</code> itself.',
+      'fn.defineTool.p_name': 'Non-empty tool name.',
+      'fn.defineTool.p_desc': 'Non-empty description shown to the agent.',
+      'fn.defineTool.p_schema': 'A Zod schema describing the tool\'s input.',
+      'fn.defineTool.p_execute': 'Your handler. Receives the parsed, typed input and <code>{ signal: AbortSignal }</code>.',
+      'fn.defineTool.returns': '<code>DefinedTool</code> &mdash; <code>{ name, description, inputSchema, execute }</code>, with <code>inputSchema</code> as JSON Schema and <code>execute</code> wrapped and async.',
+      'fn.defineTool.throws1': 'Synchronously, before doing anything else, if <code>name</code> or <code>description</code> is empty or not a string, or <code>execute</code> is not a function.',
+      'fn.registerTool.desc': 'The entry point most code calls. Always validates via <code>defineTool</code> first &mdash; a broken spec throws immediately, whether or not the browser supports WebMCP, because a bug in your spec isn\'t something the fallback should hide. Then checks <code>supportsWebMcp()</code>: if unsupported, logs a <code>console.warn</code> naming the tool and returns <code>false</code> without touching the browser; if supported, calls <code>document.modelContext.registerTool(tool, options)</code> and returns <code>true</code>.',
+      'fn.registerTool.p_spec': 'Same shape as <code>defineTool</code>\'s parameter.',
+      'fn.registerTool.p_signal': 'Lets the browser unregister the tool later.',
+      'fn.registerTool.p_exposed': 'Secure origins allowed cross-origin access.',
+      'fn.registerTool.returns': '<code>boolean</code> &mdash; <code>true</code> if actually registered with the browser, <code>false</code> if it no-opped.',
+      'fn.registerTool.throws1': 'Same as <code>defineTool</code> &mdash; an invalid spec throws regardless of browser support.',
+      'fn.defineDeclarativeTool.desc': 'Sets the four attributes the WebMCP Declarative API explainer defines directly on a <code>&lt;form&gt;</code>: <code>toolname</code>, <code>tooldescription</code>, <code>toolautosubmit</code> (presence-only), and <code>toolparamdescription</code> on the matching field elements.',
+      'fn.defineDeclarativeTool.p_form': 'A form element (or anything with <code>setAttribute</code> and an <code>elements</code> collection).',
+      'fn.defineDeclarativeTool.p_namedesc': 'Same rules as <code>defineTool</code>.',
+      'fn.defineDeclarativeTool.p_auto': 'Sets <code>toolautosubmit</code> when <code>true</code>.',
+      'fn.defineDeclarativeTool.p_fields': 'Matched against <code>form.elements</code> by <code>name</code>.',
+      'fn.defineDeclarativeTool.returns': '<code>void</code> &mdash; it mutates the form in place.',
+      'fn.defineDeclarativeTool.throws1': 'Same fail-fast as <code>defineTool</code> for <code>name</code>/<code>description</code>.',
+      'fn.defineDeclarativeTool.throws2': 'If a field name in <code>spec.fields</code> has no matching control in <code>form.elements</code>.',
+      'fn.respondToAgentSubmit.desc': 'The Declarative-side counterpart to <code>defineTool</code>\'s wrapped <code>execute</code>. Checks <code>event.agentInvoked</code>; if <code>false</code> (a human submitted the form), it does nothing and your normal submit handling runs. If <code>true</code>, it calls your handler and forwards the result &mdash; or a synchronous throw, turned into a rejection &mdash; to <code>event.respondWith()</code>.',
+      'fn.respondToAgentSubmit.p_event': 'The <code>SubmitEvent</code>, with <code>agentInvoked</code>/<code>respondWith</code> per the explainer.',
+      'fn.respondToAgentSubmit.p_handler': 'Receives the event, runs sync or async.',
+      'fn.respondToAgentSubmit.returns': '<code>boolean</code> &mdash; <code>true</code> if the submit was agent-invoked and handled, <code>false</code> otherwise.',
+      'fn.createWebMcpMock.desc': 'A testing harness. Returns a <code>document</code>-shaped object you can assign to <code>globalThis.document</code>, plus <code>invokeTool()</code> to call a registered tool the same way a real agent would &mdash; running the exact <code>execute</code> your tool was registered with, not a reimplementation.',
+      'fn.createWebMcpMock.params': 'None.',
+      'fn.createWebMcpMock.returns': '<code>WebMcpMock</code> &mdash; <code>{ document, registeredTools, invokeTool(name, input, context?) }</code>.',
+      'fn.createWebMcpMock.inv1': '<code>invokeTool</code> rejects with a clear error if no tool is registered under that name.',
+      'fn.createWebMcpMock.inv2': 'Defaults <code>context.signal</code> to a fresh <code>AbortSignal</code> if you don\'t provide one.',
+      'fn.toMcpwasmSkillSource.desc': 'Reuses the schema a <code>DefinedTool</code> already carries to emit the <code>registerTool({...})</code> source a real <a href="https://github.com/MauricioPerera/mcpwasm">mcpwasm</a> <code>tool.js</code> expects &mdash; verified against the real mcpwasm sandbox, not just checked for valid syntax. Schema-only: it never tries to translate <code>execute</code>, which exists to touch a DOM the sandbox doesn\'t have.',
+      'fn.toMcpwasmSkillSource.p_tool': 'The output of <code>defineTool()</code>.',
+      'fn.toMcpwasmSkillSource.p_body': 'Raw JS text for the sandboxed handler\'s body; defaults to a <code>TODO</code> stub naming the sandbox\'s constraints.',
+      'fn.toMcpwasmSkillSource.returns': '<code>string</code> &mdash; the <code>tool.js</code> source text.',
+      'fn.toMcpwasmSkillSource.example_note': 'The exact code verified end-to-end against the real mcpwasm CLI &mdash; see the <a href="index.html#status">status section</a>.'
+    },
+    es: {
+      'nav.home': '&larr; Inicio',
+      'lang.label': 'Idioma',
+      'theme.toggle': 'Cambiar tema de color',
+      'docs.eyebrow': 'Referencia de API',
+      'docs.h1': 'Cada export, en detalle.',
+      'docs.lede': 'Siete funciones, todo. Firmas, parámetros, valores de retorno, qué lanza y cuándo, y un ejemplo real para cada una &mdash; varios son el código exacto verificado contra un navegador real y el sandbox real de mcpwasm.',
+      'docs.group_imperative': 'Imperativa',
+      'docs.group_declarative': 'Declarativa',
+      'docs.group_testing': 'Testing',
+      'docs.group_mcpwasm': 'mcpwasm',
+      'docs.label_params': 'Parámetros',
+      'docs.label_returns': 'Devuelve',
+      'docs.label_throws': 'Lanza',
+      'docs.label_invariants': 'Invariantes',
+      'docs.label_example': 'Ejemplo',
+      'docs.col_name': 'Nombre',
+      'docs.col_type': 'Tipo',
+      'docs.col_desc': 'Descripción',
+      'footer.back_prefix': 'Volver a',
+      'fn.supportsWebMcp.desc': 'Detección de soporte pura. Devuelve <code>true</code> solo cuando <code>document.modelContext</code> existe y es un objeto no-null. Cualquier otra función acá que toca el navegador la llama primero &mdash; rara vez necesitás llamarla vos mismo, salvo que estés ramificando tu propia UI según el soporte de WebMCP.',
+      'fn.supportsWebMcp.params': 'Ninguno.',
+      'fn.supportsWebMcp.returns': '<code>boolean</code> &mdash; <code>true</code> si este navegador soporta WebMCP.',
+      'fn.supportsWebMcp.inv1': 'Nunca lanza, sea cual sea la forma de <code>document</code> &mdash; ausente, <code>null</code>, no-objeto, o cualquier otra cosa.',
+      'fn.defineTool.desc': 'Valida y normaliza una definición de tool. Deriva el JSON Schema de tu <code>inputSchema</code> de Zod, y envuelve <code>execute</code> para que cada llamada se parsee contra ese schema antes de correr tu handler. Pura &mdash; nunca toca <code>document.modelContext</code> directamente.',
+      'fn.defineTool.p_name': 'Nombre de la tool, no vacío.',
+      'fn.defineTool.p_desc': 'Descripción no vacía, mostrada al agente.',
+      'fn.defineTool.p_schema': 'Un schema de Zod que describe el input de la tool.',
+      'fn.defineTool.p_execute': 'Tu handler. Recibe el input parseado y tipado, más <code>{ signal: AbortSignal }</code>.',
+      'fn.defineTool.returns': '<code>DefinedTool</code> &mdash; <code>{ name, description, inputSchema, execute }</code>, con <code>inputSchema</code> como JSON Schema y <code>execute</code> envuelto y async.',
+      'fn.defineTool.throws1': 'Sincrónicamente, antes de hacer cualquier otra cosa, si <code>name</code> o <code>description</code> están vacíos o no son string, o <code>execute</code> no es una función.',
+      'fn.registerTool.desc': 'El punto de entrada que llama la mayoría del código. Siempre valida vía <code>defineTool</code> primero &mdash; un spec roto lanza de inmediato, tenga o no soporte el navegador, porque un bug en tu spec no es algo que el fallback deba esconder. Después chequea <code>supportsWebMcp()</code>: si no hay soporte, loguea un <code>console.warn</code> nombrando la tool y devuelve <code>false</code> sin tocar el navegador; si hay soporte, llama <code>document.modelContext.registerTool(tool, options)</code> y devuelve <code>true</code>.',
+      'fn.registerTool.p_spec': 'Misma forma que el parámetro de <code>defineTool</code>.',
+      'fn.registerTool.p_signal': 'Le permite al navegador desregistrar la tool después.',
+      'fn.registerTool.p_exposed': 'Orígenes seguros con acceso cross-origin permitido.',
+      'fn.registerTool.returns': '<code>boolean</code> &mdash; <code>true</code> si se registró de verdad con el navegador, <code>false</code> si hizo no-op.',
+      'fn.registerTool.throws1': 'Igual que <code>defineTool</code> &mdash; un spec inválido lanza sin importar el soporte del navegador.',
+      'fn.defineDeclarativeTool.desc': 'Setea los cuatro atributos que el explainer de la API Declarativa de WebMCP define directamente sobre un <code>&lt;form&gt;</code>: <code>toolname</code>, <code>tooldescription</code>, <code>toolautosubmit</code> (de sola presencia), y <code>toolparamdescription</code> en los campos que matchean.',
+      'fn.defineDeclarativeTool.p_form': 'Un elemento form (o cualquier cosa con <code>setAttribute</code> y una colección <code>elements</code>).',
+      'fn.defineDeclarativeTool.p_namedesc': 'Mismas reglas que <code>defineTool</code>.',
+      'fn.defineDeclarativeTool.p_auto': 'Setea <code>toolautosubmit</code> cuando es <code>true</code>.',
+      'fn.defineDeclarativeTool.p_fields': 'Matcheado contra <code>form.elements</code> por <code>name</code>.',
+      'fn.defineDeclarativeTool.returns': '<code>void</code> &mdash; muta el form in place.',
+      'fn.defineDeclarativeTool.throws1': 'Mismo fail-fast que <code>defineTool</code> para <code>name</code>/<code>description</code>.',
+      'fn.defineDeclarativeTool.throws2': 'Si un nombre de campo en <code>spec.fields</code> no matchea ningún control en <code>form.elements</code>.',
+      'fn.respondToAgentSubmit.desc': 'La contraparte Declarativa del <code>execute</code> envuelto de <code>defineTool</code>. Chequea <code>event.agentInvoked</code>; si es <code>false</code> (lo mandó un humano), no hace nada y corre tu manejo normal del submit. Si es <code>true</code>, llama a tu handler y reenvía el resultado &mdash; o un throw sincrónico, convertido en rechazo &mdash; a <code>event.respondWith()</code>.',
+      'fn.respondToAgentSubmit.p_event': 'El <code>SubmitEvent</code>, con <code>agentInvoked</code>/<code>respondWith</code> según el explainer.',
+      'fn.respondToAgentSubmit.p_handler': 'Recibe el event, corre sync o async.',
+      'fn.respondToAgentSubmit.returns': '<code>boolean</code> &mdash; <code>true</code> si el submit fue disparado por un agente y se manejó, <code>false</code> si no.',
+      'fn.createWebMcpMock.desc': 'Un harness de testing. Devuelve un objeto con forma de <code>document</code> que podés asignar a <code>globalThis.document</code>, más <code>invokeTool()</code> para llamar una tool registrada tal como lo haría un agente real &mdash; corriendo el <code>execute</code> exacto con el que se registró tu tool, no una reimplementación.',
+      'fn.createWebMcpMock.params': 'Ninguno.',
+      'fn.createWebMcpMock.returns': '<code>WebMcpMock</code> &mdash; <code>{ document, registeredTools, invokeTool(name, input, context?) }</code>.',
+      'fn.createWebMcpMock.inv1': '<code>invokeTool</code> rechaza con un error claro si no hay ninguna tool registrada con ese nombre.',
+      'fn.createWebMcpMock.inv2': 'Si no proveés uno, usa un <code>AbortSignal</code> fresco por default para <code>context.signal</code>.',
+      'fn.toMcpwasmSkillSource.desc': 'Reusa el schema que un <code>DefinedTool</code> ya trae para emitir el <code>registerTool({...})</code> que un <code>tool.js</code> real de <a href="https://github.com/MauricioPerera/mcpwasm">mcpwasm</a> espera &mdash; verificado contra el sandbox real de mcpwasm, no solo chequeado como sintaxis válida. Solo schema: nunca intenta traducir <code>execute</code>, que existe para tocar un DOM que el sandbox no tiene.',
+      'fn.toMcpwasmSkillSource.p_tool': 'El output de <code>defineTool()</code>.',
+      'fn.toMcpwasmSkillSource.p_body': 'Texto JS crudo para el cuerpo del handler sandboxeado; default: un stub <code>TODO</code> que nombra las restricciones del sandbox.',
+      'fn.toMcpwasmSkillSource.returns': '<code>string</code> &mdash; el texto fuente del <code>tool.js</code>.',
+      'fn.toMcpwasmSkillSource.example_note': 'El código exacto verificado de punta a punta contra el CLI real de mcpwasm &mdash; ver la <a href="index.html#status">sección de estado</a>.'
+    },
+    pt: {
+      'nav.home': '&larr; Início',
+      'lang.label': 'Idioma',
+      'theme.toggle': 'Alternar tema de cor',
+      'docs.eyebrow': 'Referência de API',
+      'docs.h1': 'Cada export, em detalhe.',
+      'docs.lede': 'Sete funções, tudo. Assinaturas, parâmetros, valores de retorno, o que lança e quando, e um exemplo real para cada uma &mdash; vários são o código exato verificado contra um navegador real e o sandbox real do mcpwasm.',
+      'docs.group_imperative': 'Imperativa',
+      'docs.group_declarative': 'Declarativa',
+      'docs.group_testing': 'Testes',
+      'docs.group_mcpwasm': 'mcpwasm',
+      'docs.label_params': 'Parâmetros',
+      'docs.label_returns': 'Retorna',
+      'docs.label_throws': 'Lança',
+      'docs.label_invariants': 'Invariantes',
+      'docs.label_example': 'Exemplo',
+      'docs.col_name': 'Nome',
+      'docs.col_type': 'Tipo',
+      'docs.col_desc': 'Descrição',
+      'footer.back_prefix': 'Voltar para',
+      'fn.supportsWebMcp.desc': 'Detecção de suporte pura. Retorna <code>true</code> só quando <code>document.modelContext</code> existe e é um objeto não-nulo. Toda outra função aqui que toca o navegador chama isso primeiro &mdash; raramente você vai precisar chamar sozinho, a menos que esteja ramificando sua própria UI conforme o suporte ao WebMCP.',
+      'fn.supportsWebMcp.params': 'Nenhum.',
+      'fn.supportsWebMcp.returns': '<code>boolean</code> &mdash; <code>true</code> se este navegador suporta WebMCP.',
+      'fn.supportsWebMcp.inv1': 'Nunca lança, seja qual for o formato de <code>document</code> &mdash; ausente, <code>null</code>, não-objeto, ou qualquer outra coisa.',
+      'fn.defineTool.desc': 'Valida e normaliza uma definição de tool. Deriva o JSON Schema do seu <code>inputSchema</code> do Zod, e envolve <code>execute</code> para que cada chamada seja validada contra esse schema antes de rodar seu handler. Pura &mdash; nunca toca <code>document.modelContext</code> diretamente.',
+      'fn.defineTool.p_name': 'Nome da tool, não vazio.',
+      'fn.defineTool.p_desc': 'Descrição não vazia, mostrada ao agente.',
+      'fn.defineTool.p_schema': 'Um schema do Zod descrevendo a entrada da tool.',
+      'fn.defineTool.p_execute': 'Seu handler. Recebe a entrada validada e tipada, mais <code>{ signal: AbortSignal }</code>.',
+      'fn.defineTool.returns': '<code>DefinedTool</code> &mdash; <code>{ name, description, inputSchema, execute }</code>, com <code>inputSchema</code> como JSON Schema e <code>execute</code> envolvido e assíncrono.',
+      'fn.defineTool.throws1': 'Sincronamente, antes de fazer qualquer outra coisa, se <code>name</code> ou <code>description</code> estiverem vazios ou não forem string, ou <code>execute</code> não for uma função.',
+      'fn.registerTool.desc': 'O ponto de entrada que a maioria do código chama. Sempre valida via <code>defineTool</code> primeiro &mdash; um spec quebrado lança imediatamente, tendo ou não suporte o navegador, porque um bug no seu spec não é algo que o fallback deva esconder. Depois verifica <code>supportsWebMcp()</code>: se não suportado, registra um <code>console.warn</code> nomeando a tool e retorna <code>false</code> sem tocar o navegador; se suportado, chama <code>document.modelContext.registerTool(tool, options)</code> e retorna <code>true</code>.',
+      'fn.registerTool.p_spec': 'Mesmo formato do parâmetro de <code>defineTool</code>.',
+      'fn.registerTool.p_signal': 'Permite ao navegador cancelar o registro da tool depois.',
+      'fn.registerTool.p_exposed': 'Origens seguras com acesso cross-origin permitido.',
+      'fn.registerTool.returns': '<code>boolean</code> &mdash; <code>true</code> se foi realmente registrado no navegador, <code>false</code> se fez no-op.',
+      'fn.registerTool.throws1': 'Igual a <code>defineTool</code> &mdash; um spec inválido lança independentemente do suporte do navegador.',
+      'fn.defineDeclarativeTool.desc': 'Define os quatro atributos que o explainer da API Declarativa do WebMCP define diretamente num <code>&lt;form&gt;</code>: <code>toolname</code>, <code>tooldescription</code>, <code>toolautosubmit</code> (só presença), e <code>toolparamdescription</code> nos elementos de campo correspondentes.',
+      'fn.defineDeclarativeTool.p_form': 'Um elemento form (ou qualquer coisa com <code>setAttribute</code> e uma coleção <code>elements</code>).',
+      'fn.defineDeclarativeTool.p_namedesc': 'Mesmas regras de <code>defineTool</code>.',
+      'fn.defineDeclarativeTool.p_auto': 'Define <code>toolautosubmit</code> quando <code>true</code>.',
+      'fn.defineDeclarativeTool.p_fields': 'Comparado com <code>form.elements</code> por <code>name</code>.',
+      'fn.defineDeclarativeTool.returns': '<code>void</code> &mdash; muta o form no local.',
+      'fn.defineDeclarativeTool.throws1': 'Mesmo fail-fast de <code>defineTool</code> para <code>name</code>/<code>description</code>.',
+      'fn.defineDeclarativeTool.throws2': 'Se um nome de campo em <code>spec.fields</code> não corresponder a nenhum controle em <code>form.elements</code>.',
+      'fn.respondToAgentSubmit.desc': 'A contraparte Declarativa do <code>execute</code> envolvido de <code>defineTool</code>. Verifica <code>event.agentInvoked</code>; se <code>false</code> (um humano enviou o formulário), não faz nada e seu tratamento normal do submit roda. Se <code>true</code>, chama seu handler e repassa o resultado &mdash; ou um throw síncrono, convertido em rejeição &mdash; para <code>event.respondWith()</code>.',
+      'fn.respondToAgentSubmit.p_event': 'O <code>SubmitEvent</code>, com <code>agentInvoked</code>/<code>respondWith</code> conforme o explainer.',
+      'fn.respondToAgentSubmit.p_handler': 'Recebe o event, roda sync ou async.',
+      'fn.respondToAgentSubmit.returns': '<code>boolean</code> &mdash; <code>true</code> se o submit foi disparado por um agente e tratado, <code>false</code> caso contrário.',
+      'fn.createWebMcpMock.desc': 'Um harness de testes. Retorna um objeto no formato de <code>document</code> que você pode atribuir a <code>globalThis.document</code>, mais <code>invokeTool()</code> para chamar uma tool registrada do mesmo jeito que um agente real faria &mdash; rodando o <code>execute</code> exato com o qual sua tool foi registrada, não uma reimplementação.',
+      'fn.createWebMcpMock.params': 'Nenhum.',
+      'fn.createWebMcpMock.returns': '<code>WebMcpMock</code> &mdash; <code>{ document, registeredTools, invokeTool(name, input, context?) }</code>.',
+      'fn.createWebMcpMock.inv1': '<code>invokeTool</code> rejeita com um erro claro se nenhuma tool estiver registrada com esse nome.',
+      'fn.createWebMcpMock.inv2': 'Usa um <code>AbortSignal</code> novo por padrão para <code>context.signal</code> se você não fornecer um.',
+      'fn.toMcpwasmSkillSource.desc': 'Reaproveita o schema que um <code>DefinedTool</code> já carrega para emitir o <code>registerTool({...})</code> que um <code>tool.js</code> real do <a href="https://github.com/MauricioPerera/mcpwasm">mcpwasm</a> espera &mdash; verificado contra o sandbox real do mcpwasm, não só checado como sintaxe válida. Só schema: nunca tenta traduzir <code>execute</code>, que existe para tocar um DOM que o sandbox não tem.',
+      'fn.toMcpwasmSkillSource.p_tool': 'A saída de <code>defineTool()</code>.',
+      'fn.toMcpwasmSkillSource.p_body': 'Texto JS bruto para o corpo do handler isolado; padrão: um stub <code>TODO</code> nomeando as restrições do sandbox.',
+      'fn.toMcpwasmSkillSource.returns': '<code>string</code> &mdash; o texto-fonte do <code>tool.js</code>.',
+      'fn.toMcpwasmSkillSource.example_note': 'O código exato verificado de ponta a ponta contra o CLI real do mcpwasm &mdash; veja a <a href="index.html#status">seção de status</a>.'
+    }
+  };
+
+  function detectLang() {
+    try {
+      var saved = localStorage.getItem('fastwebmcp:lang');
+      if (saved && I18N[saved]) return saved;
+    } catch (e) {}
+    var nav = (navigator.language || 'en').toLowerCase();
+    if (nav.indexOf('es') === 0) return 'es';
+    if (nav.indexOf('pt') === 0) return 'pt';
+    return 'en';
+  }
+
+  function applyLang(lang) {
+    var dict = I18N[lang] || I18N.en;
+    document.documentElement.setAttribute('lang', lang);
+    document.querySelectorAll('[data-i18n]').forEach(function (el) {
+      var key = el.getAttribute('data-i18n');
+      var val = dict[key];
+      if (val === undefined) return;
+      var attr = el.getAttribute('data-i18n-attr');
+      if (attr) {
+        el.setAttribute(attr, val.replace(/<[^>]+>/g, ''));
+      } else {
+        el.innerHTML = val;
+      }
+    });
+    document.querySelectorAll('[data-lang-btn]').forEach(function (btn) {
+      btn.setAttribute('aria-current', btn.getAttribute('data-lang-btn') === lang ? 'true' : 'false');
+    });
+    try { localStorage.setItem('fastwebmcp:lang', lang); } catch (e) {}
+  }
+
+  document.querySelectorAll('[data-lang-btn]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      applyLang(btn.getAttribute('data-lang-btn'));
+    });
+  });
+
+  applyLang(detectLang());
+
+  var themeToggle = document.getElementById('theme-toggle');
+  themeToggle.addEventListener('click', function () {
+    var current = document.documentElement.getAttribute('data-theme');
+    var effectiveDark = current ? current === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+    var next = effectiveDark ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    try { localStorage.setItem('fastwebmcp:theme', next); } catch (e) {}
+  });
+})();
+</script>
+</body>
+</html>
