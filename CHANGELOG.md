@@ -4,6 +4,19 @@ All notable changes to the KDD Template are documented here.
 
 ## Unreleased
 
+**Contract 46 — fastwebmcp-start: quickstart real contra el paquete publicado** ([C46-REPORT](docs/reports/CONTRACT-46-REPORT.md))
+
+Nuevo directorio `fastwebmcp-start/`: paquete npm separado que instala `fastwebmcp`
+desde el registro real (no `src_ts/` local) -- dos demos (Imperativa/Declarativa,
+iguales a `examples/` salvo el import) y dos smoke tests en Node puro (mock +
+generacion de skill mcpwasm), verificados de verdad: `npm install` real, ambos smoke
+tests corridos con salida capturada (no supuesta), build con esbuild, 5/5 URLs en
+`200` via `curl`, y ambas demos ejercitadas en dos navegadores reales (fallback en un
+Chrome sin WebMCP, registro+ejecucion real en el Chrome real del usuario). Se origino
+en una respuesta de OTRA instancia de IA que describia este mismo scaffold sin que
+existiera en ningun lado -- verificado que no existia, y construido de verdad a pedido
+del usuario.
+
 **Contract 45 — Verificacion real de extremo a extremo (WebMCP + mcpwasm)** ([C45-REPORT](docs/reports/CONTRACT-45-REPORT.md))
 
 A pedido del usuario, verificacion pura contra los dos runtimes reales que

@@ -1,0 +1,20 @@
+{
+  "name": "fastwebmcp-start",
+  "version": "0.0.0",
+  "private": true,
+  "description": "A real, runnable quickstart for fastwebmcp: installs the published npm package (not the monorepo's local src_ts/), two browser demos, and two smoke tests (WebMCP mock + real mcpwasm skill generation).",
+  "type": "module",
+  "scripts": {
+    "build": "esbuild demo/imperative-demo.ts demo/declarative-demo.ts --bundle --format=esm --outdir=demo/dist",
+    "serve": "npm run build && http-server . -p 8347 -c-1",
+    "smoke": "node smoke/mock-smoke.mjs && node smoke/mcpwasm-bridge.mjs"
+  },
+  "dependencies": {
+    "fastwebmcp": "^0.2.0",
+    "zod": "^4.5.4"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2",
+    "http-server": "^14.1.1"
+  }
+}
