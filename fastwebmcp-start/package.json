@@ -10,7 +10,7 @@
     "smoke": "node smoke/mock-smoke.mjs && node smoke/mcpwasm-bridge.mjs"
   },
   "dependencies": {
-    "fastwebmcp": "^0.2.0",
+    "fastwebmcp": "^0.3.0",
     "zod": "^4.5.4"
   },
   "devDependencies": {
