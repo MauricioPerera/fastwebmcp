@@ -1,0 +1,6 @@
+# scripts/ and tests/ are the KDD template's Python validation gates and their own test
+# suite -- tooling this repo was bootstrapped with, not the fastwebmcp library itself.
+# Without this, GitHub's language stats read "Python" for what is a TypeScript/npm
+# library (verified: scripts/+tests/ account for ~2MB of .py vs ~35KB of src_ts/*.ts).
+scripts/** linguist-vendored=true
+tests/** linguist-vendored=true

@@ -4,6 +4,20 @@ All notable changes to the KDD Template are documented here.
 
 ## Unreleased
 
+**Contract 49 — .gitattributes para las estadisticas de lenguaje de GitHub** ([C49-REPORT](docs/reports/CONTRACT-49-REPORT.md))
+
+Un agente de auditoria (siguiendo el mismo flujo de CONTRACT-47/48) encontro, via
+`gh api repos/.../languages`, que GitHub reporta este repo como "Python" por encima de
+"TypeScript" -- los gates Python de la plantilla KDD (`scripts/`, `tests/`, ~2MB) superan
+por mucho al codigo real de la libreria (`src_ts/`, ~35KB). Corroborado de forma
+independiente por un doc del repo hermano `mcpwasm` que senala el mismo problema de
+discoverability. Agregado `.gitattributes` marcando `scripts/**`/`tests/**` como
+`linguist-vendored` -- verificado con `git check-attr` que cubre ambos directorios
+(incluidos subdirectorios anidados) sin afectar `src_ts/`. De paso, parejada una
+inconsistencia trivial: `README.md` decia "Chrome 149" sin "+", mientras `gh-pages` ya
+decia "Chrome 149+" de forma consistente -- el reclamo en si sigue siendo cierto
+(WebMCP sigue en origin trial en Chrome 152 estable, verificado contra el spec real).
+
 **Contract 48 — Campo title en defineTool()** ([C48-REPORT](docs/reports/CONTRACT-48-REPORT.md))
 
 Siguiendo el mismo flujo de auditoria que encontro `annotations` en CONTRACT-47, se

@@ -8,7 +8,7 @@
 FastMCP-style ergonomics for [WebMCP](https://github.com/webmachinelearning/webmcp): typed
 Zod builders over the browser's Imperative and Declarative APIs, with safe no-op +
 warning degradation when `document.modelContext` isn't available (WebMCP is still an
-origin trial as of Chrome 149 — most visitors won't have it yet).
+origin trial as of Chrome 149+ — most visitors won't have it yet).
 
 ## Install
 
