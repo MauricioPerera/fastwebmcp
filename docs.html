@@ -409,10 +409,11 @@
           <tr><td><code>spec.inputSchema</code></td><td><code>ZodType</code></td><td class="pdesc" data-i18n="fn.defineTool.p_schema">A Zod schema describing the tool's input.</td></tr>
           <tr><td><code>spec.execute</code></td><td><code>(input, ctx) =&gt; unknown</code></td><td class="pdesc" data-i18n="fn.defineTool.p_execute">Your handler. Receives the parsed, typed input and <code>{ signal: AbortSignal }</code>.</td></tr>
           <tr><td><code>spec.annotations?</code></td><td><code>{ readOnlyHint?, untrustedContentHint? }</code></td><td class="pdesc" data-i18n="fn.defineTool.p_annotations">Optional. Forwarded as-is to <code>document.modelContext.registerTool()</code> &mdash; omitted from the result entirely when not passed.</td></tr>
+          <tr><td><code>spec.title?</code></td><td><code>string</code></td><td class="pdesc" data-i18n="fn.defineTool.p_title">Optional human-readable label. Forwarded as-is &mdash; omitted from the result entirely when not passed. No format restriction, unlike <code>name</code>.</td></tr>
         </table>
 
         <span class="fn-meta-label" data-i18n="docs.label_returns">Returns</span>
-        <p data-i18n="fn.defineTool.returns"><code>DefinedTool</code> &mdash; <code>{ name, description, inputSchema, execute, annotations? }</code>, with <code>inputSchema</code> as JSON Schema and <code>execute</code> wrapped and async.</p>
+        <p data-i18n="fn.defineTool.returns"><code>DefinedTool</code> &mdash; <code>{ name, description, inputSchema, execute, annotations?, title? }</code>, with <code>inputSchema</code> as JSON Schema and <code>execute</code> wrapped and async.</p>
 
         <span class="fn-meta-label" data-i18n="docs.label_throws">Throws</span>
         <ul class="invariants">
@@ -669,7 +670,8 @@ toMcpwasmSkillSource(tool, {
       'fn.defineTool.p_schema': 'A Zod schema describing the tool\'s input.',
       'fn.defineTool.p_execute': 'Your handler. Receives the parsed, typed input and <code>{ signal: AbortSignal }</code>.',
       'fn.defineTool.p_annotations': 'Optional. Forwarded as-is to <code>document.modelContext.registerTool()</code> &mdash; omitted from the result entirely when not passed.',
-      'fn.defineTool.returns': '<code>DefinedTool</code> &mdash; <code>{ name, description, inputSchema, execute, annotations? }</code>, with <code>inputSchema</code> as JSON Schema and <code>execute</code> wrapped and async.',
+      'fn.defineTool.p_title': 'Optional human-readable label. Forwarded as-is &mdash; omitted from the result entirely when not passed. No format restriction, unlike <code>name</code>.',
+      'fn.defineTool.returns': '<code>DefinedTool</code> &mdash; <code>{ name, description, inputSchema, execute, annotations?, title? }</code>, with <code>inputSchema</code> as JSON Schema and <code>execute</code> wrapped and async.',
       'fn.defineTool.throws1': 'Synchronously, before doing anything else, if <code>name</code> or <code>description</code> is empty or not a string, or <code>execute</code> is not a function.',
       'fn.defineTool.throws2': 'If <code>name</code> doesn\'t match the WebMCP spec\'s charset/length (<code>[A-Za-z0-9_.-]{1,128}</code>) &mdash; fails here with a clear message instead of the browser rejecting it later with a less useful one.',
       'fn.defineTool.warns1': 'Via <code>console.warn</code> (never throws) if <code>name</code> exceeds 30 characters or <code>description</code> exceeds 500 &mdash; the limits Chrome\'s <a href="https://developer.chrome.com/docs/ai/webmcp/secure-tools">tool security guide</a> recommends for reliable agent results.',
@@ -733,7 +735,8 @@ toMcpwasmSkillSource(tool, {
       'fn.defineTool.p_schema': 'Un schema de Zod que describe el input de la tool.',
       'fn.defineTool.p_execute': 'Tu handler. Recibe el input parseado y tipado, más <code>{ signal: AbortSignal }</code>.',
       'fn.defineTool.p_annotations': 'Opcional. Se reenvía tal cual a <code>document.modelContext.registerTool()</code> &mdash; se omite del resultado por completo si no se pasa.',
-      'fn.defineTool.returns': '<code>DefinedTool</code> &mdash; <code>{ name, description, inputSchema, execute, annotations? }</code>, con <code>inputSchema</code> como JSON Schema y <code>execute</code> envuelto y async.',
+      'fn.defineTool.p_title': 'Etiqueta legible opcional. Se reenvía tal cual &mdash; se omite del resultado por completo si no se pasa. Sin restricción de formato, a diferencia de <code>name</code>.',
+      'fn.defineTool.returns': '<code>DefinedTool</code> &mdash; <code>{ name, description, inputSchema, execute, annotations?, title? }</code>, con <code>inputSchema</code> como JSON Schema y <code>execute</code> envuelto y async.',
       'fn.defineTool.throws1': 'Sincrónicamente, antes de hacer cualquier otra cosa, si <code>name</code> o <code>description</code> están vacíos o no son string, o <code>execute</code> no es una función.',
       'fn.defineTool.throws2': 'Si <code>name</code> no cumple el charset/longitud del spec de WebMCP (<code>[A-Za-z0-9_.-]{1,128}</code>) &mdash; falla acá con un mensaje claro, en vez de que el navegador lo rechace después con uno menos útil.',
       'fn.defineTool.warns1': 'Vía <code>console.warn</code> (nunca lanza) si <code>name</code> supera los 30 caracteres o <code>description</code> los 500 &mdash; los límites que recomienda la <a href="https://developer.chrome.com/docs/ai/webmcp/secure-tools">guía de seguridad de Chrome</a> para resultados confiables del agente.',
@@ -797,7 +800,8 @@ toMcpwasmSkillSource(tool, {
       'fn.defineTool.p_schema': 'Um schema do Zod descrevendo a entrada da tool.',
       'fn.defineTool.p_execute': 'Seu handler. Recebe a entrada validada e tipada, mais <code>{ signal: AbortSignal }</code>.',
       'fn.defineTool.p_annotations': 'Opcional. Repassado tal como está para <code>document.modelContext.registerTool()</code> &mdash; omitido do resultado por completo quando não é passado.',
-      'fn.defineTool.returns': '<code>DefinedTool</code> &mdash; <code>{ name, description, inputSchema, execute, annotations? }</code>, com <code>inputSchema</code> como JSON Schema e <code>execute</code> envolvido e assíncrono.',
+      'fn.defineTool.p_title': 'Rótulo legível opcional. Repassado tal como está &mdash; omitido do resultado por completo quando não é passado. Sem restrição de formato, ao contrário de <code>name</code>.',
+      'fn.defineTool.returns': '<code>DefinedTool</code> &mdash; <code>{ name, description, inputSchema, execute, annotations?, title? }</code>, com <code>inputSchema</code> como JSON Schema e <code>execute</code> envolvido e assíncrono.',
       'fn.defineTool.throws1': 'Sincronamente, antes de fazer qualquer outra coisa, se <code>name</code> ou <code>description</code> estiverem vazios ou não forem string, ou <code>execute</code> não for uma função.',
       'fn.defineTool.throws2': 'Se <code>name</code> não corresponder ao charset/tamanho do spec de WebMCP (<code>[A-Za-z0-9_.-]{1,128}</code>) &mdash; falha aqui com uma mensagem clara, em vez do navegador rejeitá-lo depois com uma menos útil.',
       'fn.defineTool.warns1': 'Via <code>console.warn</code> (nunca lança) se <code>name</code> ultrapassar 30 caracteres ou <code>description</code> ultrapassar 500 &mdash; os limites que o <a href="https://developer.chrome.com/docs/ai/webmcp/secure-tools">guia de segurança do Chrome</a> recomenda para resultados confiáveis do agente.',
