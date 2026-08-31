@@ -15,7 +15,7 @@ budget:
   lines_max: 25
   params_max: 2
 tests: "tests_ts/to-mcpwasm-skill.test.ts"
-tests_sha256: "bc555a285a17edb0f334744c9ce6bad5f305546367049d3b692cd8cc24c119b3"
+tests_sha256: "b3f0f93fa16587b89e270efda6ed785c2ed6b9f4b70132321f73d1fd801db47c"
 touch_only: ['src_ts/to-mcpwasm-skill.ts']
 deps_allowed: []
 forbids: ['network', 'subprocess', 'llm']

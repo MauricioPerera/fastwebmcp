@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { z } from 'zod';
 import { defineTool } from '../src_ts/define-tool.ts';
+import { withWarnSpy } from './mock-globals.ts';
 
 const noopSignal = new AbortController().signal;
 
@@ -114,4 +115,95 @@ test('the wrapped execute forwards the AbortSignal context unchanged', async () 
 
   await tool.execute({}, { signal: noopSignal });
   assert.equal(receivedSignal, noopSignal);
+});
+
+test('passes annotations through to the returned tool when provided', () => {
+  const tool = defineTool({
+    name: 'get_price',
+    description: 'Reads the current price. Read-only.',
+    inputSchema: z.object({}),
+    execute: async () => '$10',
+    annotations: { readOnlyHint: true, untrustedContentHint: false },
+  });
+
+  assert.deepEqual(tool.annotations, { readOnlyHint: true, untrustedContentHint: false });
+});
+
+test('omits annotations from the returned tool entirely when not provided', () => {
+  const tool = defineTool({
+    name: 'get_price',
+    description: 'Reads the current price.',
+    inputSchema: z.object({}),
+    execute: async () => '$10',
+  });
+
+  assert.equal('annotations' in tool, false);
+});
+
+test('throws when name contains a character outside [A-Za-z0-9_.-]', () => {
+  assert.throws(
+    () =>
+      defineTool({
+        name: 'my tool!',
+        description: 'desc',
+        inputSchema: z.object({}),
+        execute: async () => 'ok',
+      }),
+    /name must be 1-128 characters/,
+  );
+});
+
+test('throws when name exceeds 128 characters', () => {
+  assert.throws(
+    () =>
+      defineTool({
+        name: 'a'.repeat(129),
+        description: 'desc',
+        inputSchema: z.object({}),
+        execute: async () => 'ok',
+      }),
+    /name must be 1-128 characters/,
+  );
+});
+
+test('warns (without throwing) when name exceeds the 30-character budget Chrome recommends', () => {
+  withWarnSpy((calls) => {
+    const tool = defineTool({
+      name: 'a'.repeat(35),
+      description: 'desc',
+      inputSchema: z.object({}),
+      execute: async () => 'ok',
+    });
+
+    assert.equal(tool.name.length, 35);
+    assert.equal(calls.length, 1);
+    assert.match(String(calls[0][0]), /tool name is 35 characters/);
+  });
+});
+
+test('warns (without throwing) when description exceeds the 500-character budget Chrome recommends', () => {
+  withWarnSpy((calls) => {
+    defineTool({
+      name: 'x',
+      description: 'd'.repeat(501),
+      inputSchema: z.object({}),
+      execute: async () => 'ok',
+    });
+
+    assert.equal(calls.length, 1);
+    assert.match(String(calls[0][0]), /tool description is 501 characters/);
+  });
+});
+
+test('does not warn for a name and description within budget', () => {
+  withWarnSpy((calls) => {
+    defineTool({
+      name: 'greet',
+      description: 'Greets someone.',
+      inputSchema: z.object({ name: z.string() }),
+      execute: async ({ name }) => `Hello, ${name}!`,
+    });
+
+    assert.equal(calls.length, 0);
+  });
 });

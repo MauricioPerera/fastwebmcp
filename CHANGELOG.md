@@ -4,6 +4,26 @@ All notable changes to the KDD Template are documented here.
 
 ## Unreleased
 
+**Contract 47 — Annotations, formato de name y avisos de presupuesto en defineTool()** ([C47-REPORT](docs/reports/CONTRACT-47-REPORT.md))
+
+A raiz de escanear el propio sitio en `webmcp.com` (grade B+, senalo "No result schemas
+anywhere"), se investigo si valia la pena agregar `outputSchema` -- descartado: no existe
+en el spec de WebMCP ni en la implementacion real de Chrome, ni en ningun otro sitio del
+directorio (confirmado contra el JSON crudo de `render.com`). La investigacion de
+seguimiento encontro dos gaps reales y accionables, ambos verificados contra fuente
+primaria: `defineTool()` ahora acepta `annotations?: { readOnlyHint, untrustedContentHint }`
+(soportado por el spec y por Chrome, antes ausente de fastwebmcp por completo) y valida el
+`name` contra el charset/longitud real del spec (`[A-Za-z0-9_.-]{1,128}`), lanzando un
+error claro en vez de dejar que el navegador rechace un nombre invalido de forma menos
+util. Ademas, avisa (nunca lanza) cuando `name` o `description` superan los limites que
+recomienda la guia de seguridad de Chrome (30 y 500 caracteres) para resultados confiables
+del agente. Un test existente de `to-mcpwasm-skill.test.ts` usaba un `name` con comillas
+para probar escapado seguro -- invalido bajo la nueva regla; movido a `description` (que
+el spec no restringe), sin perder la cobertura de la propiedad de seguridad que protegia.
+Ambos oraculos re-sellados (`define-tool.md`: 8 -> 15 tests; `to-mcpwasm-skill.md`: sin
+cambio de conteo). `node --test "tests_ts/*.test.ts"`: 53/53 verde, 2x. Sin publicar a npm
+ni taggear (fuera de alcance de este contrato).
+
 **Contract 46 — fastwebmcp-start: quickstart real contra el paquete publicado** ([C46-REPORT](docs/reports/CONTRACT-46-REPORT.md))
 
 Nuevo directorio `fastwebmcp-start/`: paquete npm separado que instala `fastwebmcp`

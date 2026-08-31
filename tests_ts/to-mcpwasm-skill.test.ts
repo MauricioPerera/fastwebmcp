@@ -44,18 +44,22 @@ test('output is syntactically valid JavaScript (compiles as a function body with
   assert.doesNotThrow(() => new Function(src));
 });
 
-test('escapes special characters in name/description safely (quotes, backslash, newline)', () => {
+test('escapes special characters in description safely (quotes, backslash, newline)', () => {
+  // The name field can no longer carry these characters -- defineTool (CONTRACT-47) now
+  // rejects any name outside the WebMCP spec's [A-Za-z0-9_.-]{1,128} charset. The
+  // description field has no such restriction, so the escaping property this test
+  // guards (safe JS-string serialization of untrusted text) still lives there.
   const tricky = defineTool({
-    name: 'weird_"tool"',
+    name: 'weird_tool',
     description: 'Has a "quote", a backslash \\ and a\nnewline.',
     inputSchema: z.object({}),
     execute: async () => 'ok',
   });
   const src = toMcpwasmSkillSource(tricky);
   assert.doesNotThrow(() => new Function(src));
-  const nameMatch = src.match(/name:\s*(".*?[^\\]")/);
-  assert.ok(nameMatch);
-  assert.equal(JSON.parse(nameMatch[1]), 'weird_"tool"');
+  const descMatch = src.match(/description:\s*(".*?[^\\]")/);
+  assert.ok(descMatch);
+  assert.equal(JSON.parse(descMatch[1]), 'Has a "quote", a backslash \\ and a\nnewline.');
 });
 
 test('handler is declared as a plain method (works for both sync and async handlerBody text)', () => {

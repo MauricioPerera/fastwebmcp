@@ -15,7 +15,7 @@ budget:
   lines_max: 40
   params_max: 1
 tests: "tests_ts/define-tool.test.ts"
-tests_sha256: "1d18409aa83eff93f6cb49c988b9bd24be95e3f59636a3efec4448870d8c30b1"
+tests_sha256: "ba6702954bc7fed3a5debd71801bbce8859dc3da62a626d14727c65e24142341"
 touch_only: ['src_ts/define-tool.ts']
 deps_allowed: ['zod']
 forbids: ['network', 'subprocess', 'llm']
@@ -39,11 +39,17 @@ campo `inputSchema` = JSON Schema con `type`/`properties`/`required`, `execute` 
 
 ## Interface
 ```
+interface ToolAnnotations {
+  readOnlyHint?: boolean;
+  untrustedContentHint?: boolean;
+}
+
 interface ToolSpec<TSchema extends ZodType> {
   name: string;
   description: string;
   inputSchema: TSchema;
   execute: (input: z.infer<TSchema>, context: { signal: AbortSignal }) => unknown;
+  annotations?: ToolAnnotations;
 }
 
 interface DefinedTool {
@@ -51,6 +57,7 @@ interface DefinedTool {
   description: string;
   inputSchema: Record<string, unknown>; // JSON Schema
   execute: (rawInput: unknown, context: { signal: AbortSignal }) => Promise<unknown>;
+  annotations?: ToolAnnotations;
 }
 
 function defineTool<TSchema extends ZodType>(spec: ToolSpec<TSchema>): DefinedTool
@@ -61,6 +68,19 @@ function defineTool<TSchema extends ZodType>(spec: ToolSpec<TSchema>): DefinedTo
   no vacio (trim), si `description` no es un string no vacio (trim), o si `execute` no es
   una funcion. Fail-fast en tiempo de definicion, igual que FastMCP al decorar una funcion
   con firma invalida.
+- Lanza si `name` no cumple el charset/longitud que exige el spec real de WebMCP
+  (`webmachinelearning.github.io/webmcp`, verificado con fuente primaria, CONTRACT-47):
+  1-128 caracteres, solo `[A-Za-z0-9_.-]`. Antes de CONTRACT-47 esto no se validaba —
+  un nombre invalido pasaba `defineTool()` sin error y fallaba despues, sin mensaje claro,
+  al llegar al `document.modelContext.registerTool()` real del navegador.
+- Si `name` supera 30 caracteres o `description` supera 500, emite `console.warn` (NO
+  lanza) citando el limite recomendado por la guia de seguridad de Chrome
+  (`developer.chrome.com/docs/ai/webmcp/secure-tools`) para resultados confiables del
+  agente. Son recomendaciones, no reglas del spec — por eso avisan en vez de romper.
+- Si `spec.annotations` esta presente, se copia tal cual al `DefinedTool` devuelto (mismo
+  shape `ToolAnnotations` que espera `document.modelContext.registerTool()`). Si esta
+  ausente, la clave `annotations` NO aparece en el objeto devuelto (no se manda `undefined`
+  ni un objeto vacio al navegador).
 - El `inputSchema` devuelto es siempre el resultado de `z.toJSONSchema(spec.inputSchema)`
   — nunca el objeto Zod crudo.
 - El `execute` devuelto SIEMPRE parsea (`spec.inputSchema.parse(rawInput)`) antes de llamar
@@ -74,7 +94,13 @@ function defineTool<TSchema extends ZodType>(spec: ToolSpec<TSchema>): DefinedTo
 - `defineTool({ name: 'toggle_layer', description: '...', inputSchema: z.object({ layer: z.enum([...]) }), execute: ... })`
   -> `{ name: 'toggle_layer', description: '...', inputSchema: <JSON Schema>, execute: <fn> }`
 - `defineTool({ name: '', ... })` -> lanza `Error: defineTool: name must be a non-empty string`
+- `defineTool({ name: 'my tool!', ... })` -> lanza `Error: defineTool: name must be 1-128
+  characters of letters, numbers, "_", "-", or "."`
 - `defineTool({ ..., execute: 'not-a-function' })` -> lanza `Error: defineTool: execute must be a function`
+- `defineTool({ name: 'get_price', ..., annotations: { readOnlyHint: true } })` -> el objeto
+  devuelto incluye `annotations: { readOnlyHint: true }`.
+- `defineTool({ name: 'a'.repeat(35), ... })` -> no lanza, pero emite `console.warn` con
+  "tool name is 35 characters; Chrome recommends <=30...".
 - `tool.execute({ name: 42 }, { signal })` (donde el schema espera `string`) -> promesa
   rechazada con el `ZodError` del parseo.
 

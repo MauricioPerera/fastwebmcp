@@ -39,6 +39,13 @@ your handler runs), then calls `document.modelContext.registerTool(...)` if the 
 supports it — falling back to a `console.warn` no-op otherwise, so your page never
 breaks on an unsupported browser.
 
+`defineTool` also validates `name` against the WebMCP spec's own charset (1-128 chars,
+`[A-Za-z0-9_.-]`), and warns — never throws — if `name`/`description` exceed the length
+Chrome's [tool security guide](https://developer.chrome.com/docs/ai/webmcp/secure-tools)
+recommends for reliable agent results. Pass `annotations: { readOnlyHint, untrustedContentHint }`
+to flag a tool as side-effect-free or as returning untrusted data — it's forwarded as-is
+to `document.modelContext.registerTool()`.
+
 ## Declarative API
 
 ```ts
