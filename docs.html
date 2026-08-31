@@ -404,18 +404,25 @@
         <span class="fn-meta-label" data-i18n="docs.label_params">Parameters</span>
         <table class="param-table">
           <tr><th data-i18n="docs.col_name">Name</th><th data-i18n="docs.col_type">Type</th><th data-i18n="docs.col_desc">Description</th></tr>
-          <tr><td><code>spec.name</code></td><td><code>string</code></td><td class="pdesc" data-i18n="fn.defineTool.p_name">Non-empty tool name.</td></tr>
+          <tr><td><code>spec.name</code></td><td><code>string</code></td><td class="pdesc" data-i18n="fn.defineTool.p_name">Non-empty, 1-128 characters, letters/numbers/"_"/"-"/"." only (the WebMCP spec's own charset).</td></tr>
           <tr><td><code>spec.description</code></td><td><code>string</code></td><td class="pdesc" data-i18n="fn.defineTool.p_desc">Non-empty description shown to the agent.</td></tr>
           <tr><td><code>spec.inputSchema</code></td><td><code>ZodType</code></td><td class="pdesc" data-i18n="fn.defineTool.p_schema">A Zod schema describing the tool's input.</td></tr>
           <tr><td><code>spec.execute</code></td><td><code>(input, ctx) =&gt; unknown</code></td><td class="pdesc" data-i18n="fn.defineTool.p_execute">Your handler. Receives the parsed, typed input and <code>{ signal: AbortSignal }</code>.</td></tr>
+          <tr><td><code>spec.annotations?</code></td><td><code>{ readOnlyHint?, untrustedContentHint? }</code></td><td class="pdesc" data-i18n="fn.defineTool.p_annotations">Optional. Forwarded as-is to <code>document.modelContext.registerTool()</code> &mdash; omitted from the result entirely when not passed.</td></tr>
         </table>
 
         <span class="fn-meta-label" data-i18n="docs.label_returns">Returns</span>
-        <p data-i18n="fn.defineTool.returns"><code>DefinedTool</code> &mdash; <code>{ name, description, inputSchema, execute }</code>, with <code>inputSchema</code> as JSON Schema and <code>execute</code> wrapped and async.</p>
+        <p data-i18n="fn.defineTool.returns"><code>DefinedTool</code> &mdash; <code>{ name, description, inputSchema, execute, annotations? }</code>, with <code>inputSchema</code> as JSON Schema and <code>execute</code> wrapped and async.</p>
 
         <span class="fn-meta-label" data-i18n="docs.label_throws">Throws</span>
         <ul class="invariants">
           <li data-i18n="fn.defineTool.throws1">Synchronously, before doing anything else, if <code>name</code> or <code>description</code> is empty or not a string, or <code>execute</code> is not a function.</li>
+          <li data-i18n="fn.defineTool.throws2">If <code>name</code> doesn't match the WebMCP spec's charset/length (<code>[A-Za-z0-9_.-]{1,128}</code>) &mdash; fails here with a clear message instead of the browser rejecting it later with a less useful one.</li>
+        </ul>
+
+        <span class="fn-meta-label" data-i18n="docs.label_warns">Warns</span>
+        <ul class="invariants">
+          <li data-i18n="fn.defineTool.warns1">Via <code>console.warn</code> (never throws) if <code>name</code> exceeds 30 characters or <code>description</code> exceeds 500 &mdash; the limits Chrome's <a href="https://developer.chrome.com/docs/ai/webmcp/secure-tools">tool security guide</a> recommends for reliable agent results.</li>
         </ul>
 
         <span class="fn-meta-label" data-i18n="docs.label_example">Example</span>
@@ -425,6 +432,7 @@
   description: <span class="str">'Add a todo item to the list.'</span>,
   inputSchema: z.object({ text: z.string().min(1) }),
   execute: <span class="kw">async</span> ({ text }) =&gt; <span class="str">`Added: ${text}`</span>,
+  annotations: { readOnlyHint: <span class="kw">false</span> },
 });</pre>
         </div>
       </section>
@@ -644,6 +652,7 @@ toMcpwasmSkillSource(tool, {
       'docs.label_params': 'Parameters',
       'docs.label_returns': 'Returns',
       'docs.label_throws': 'Throws',
+      'docs.label_warns': 'Warns',
       'docs.label_invariants': 'Invariants',
       'docs.label_example': 'Example',
       'docs.col_name': 'Name',
@@ -655,12 +664,15 @@ toMcpwasmSkillSource(tool, {
       'fn.supportsWebMcp.returns': '<code>boolean</code> &mdash; <code>true</code> if this browser supports WebMCP.',
       'fn.supportsWebMcp.inv1': 'Never throws, regardless of <code>document</code>\'s shape &mdash; missing, <code>null</code>, not an object, or anything else.',
       'fn.defineTool.desc': 'Validates and normalizes a tool definition. Derives the JSON Schema from your Zod <code>inputSchema</code>, and wraps <code>execute</code> so every call is parsed against that schema before your handler runs. Pure &mdash; it never touches <code>document.modelContext</code> itself.',
-      'fn.defineTool.p_name': 'Non-empty tool name.',
+      'fn.defineTool.p_name': 'Non-empty, 1-128 characters, letters/numbers/"_"/"-"/"." only (the WebMCP spec\'s own charset).',
       'fn.defineTool.p_desc': 'Non-empty description shown to the agent.',
       'fn.defineTool.p_schema': 'A Zod schema describing the tool\'s input.',
       'fn.defineTool.p_execute': 'Your handler. Receives the parsed, typed input and <code>{ signal: AbortSignal }</code>.',
-      'fn.defineTool.returns': '<code>DefinedTool</code> &mdash; <code>{ name, description, inputSchema, execute }</code>, with <code>inputSchema</code> as JSON Schema and <code>execute</code> wrapped and async.',
+      'fn.defineTool.p_annotations': 'Optional. Forwarded as-is to <code>document.modelContext.registerTool()</code> &mdash; omitted from the result entirely when not passed.',
+      'fn.defineTool.returns': '<code>DefinedTool</code> &mdash; <code>{ name, description, inputSchema, execute, annotations? }</code>, with <code>inputSchema</code> as JSON Schema and <code>execute</code> wrapped and async.',
       'fn.defineTool.throws1': 'Synchronously, before doing anything else, if <code>name</code> or <code>description</code> is empty or not a string, or <code>execute</code> is not a function.',
+      'fn.defineTool.throws2': 'If <code>name</code> doesn\'t match the WebMCP spec\'s charset/length (<code>[A-Za-z0-9_.-]{1,128}</code>) &mdash; fails here with a clear message instead of the browser rejecting it later with a less useful one.',
+      'fn.defineTool.warns1': 'Via <code>console.warn</code> (never throws) if <code>name</code> exceeds 30 characters or <code>description</code> exceeds 500 &mdash; the limits Chrome\'s <a href="https://developer.chrome.com/docs/ai/webmcp/secure-tools">tool security guide</a> recommends for reliable agent results.',
       'fn.registerTool.desc': 'The entry point most code calls. Always validates via <code>defineTool</code> first &mdash; a broken spec throws immediately, whether or not the browser supports WebMCP, because a bug in your spec isn\'t something the fallback should hide. Then checks <code>supportsWebMcp()</code>: if unsupported, logs a <code>console.warn</code> naming the tool and returns <code>false</code> without touching the browser; if supported, calls <code>document.modelContext.registerTool(tool, options)</code> and returns <code>true</code>.',
       'fn.registerTool.p_spec': 'Same shape as <code>defineTool</code>\'s parameter.',
       'fn.registerTool.p_signal': 'Lets the browser unregister the tool later.',
@@ -704,6 +716,7 @@ toMcpwasmSkillSource(tool, {
       'docs.label_params': 'Parámetros',
       'docs.label_returns': 'Devuelve',
       'docs.label_throws': 'Lanza',
+      'docs.label_warns': 'Avisa',
       'docs.label_invariants': 'Invariantes',
       'docs.label_example': 'Ejemplo',
       'docs.col_name': 'Nombre',
@@ -715,12 +728,15 @@ toMcpwasmSkillSource(tool, {
       'fn.supportsWebMcp.returns': '<code>boolean</code> &mdash; <code>true</code> si este navegador soporta WebMCP.',
       'fn.supportsWebMcp.inv1': 'Nunca lanza, sea cual sea la forma de <code>document</code> &mdash; ausente, <code>null</code>, no-objeto, o cualquier otra cosa.',
       'fn.defineTool.desc': 'Valida y normaliza una definición de tool. Deriva el JSON Schema de tu <code>inputSchema</code> de Zod, y envuelve <code>execute</code> para que cada llamada se parsee contra ese schema antes de correr tu handler. Pura &mdash; nunca toca <code>document.modelContext</code> directamente.',
-      'fn.defineTool.p_name': 'Nombre de la tool, no vacío.',
+      'fn.defineTool.p_name': 'No vacío, 1-128 caracteres, solo letras/números/"_"/"-"/"." (el charset propio del spec de WebMCP).',
       'fn.defineTool.p_desc': 'Descripción no vacía, mostrada al agente.',
       'fn.defineTool.p_schema': 'Un schema de Zod que describe el input de la tool.',
       'fn.defineTool.p_execute': 'Tu handler. Recibe el input parseado y tipado, más <code>{ signal: AbortSignal }</code>.',
-      'fn.defineTool.returns': '<code>DefinedTool</code> &mdash; <code>{ name, description, inputSchema, execute }</code>, con <code>inputSchema</code> como JSON Schema y <code>execute</code> envuelto y async.',
+      'fn.defineTool.p_annotations': 'Opcional. Se reenvía tal cual a <code>document.modelContext.registerTool()</code> &mdash; se omite del resultado por completo si no se pasa.',
+      'fn.defineTool.returns': '<code>DefinedTool</code> &mdash; <code>{ name, description, inputSchema, execute, annotations? }</code>, con <code>inputSchema</code> como JSON Schema y <code>execute</code> envuelto y async.',
       'fn.defineTool.throws1': 'Sincrónicamente, antes de hacer cualquier otra cosa, si <code>name</code> o <code>description</code> están vacíos o no son string, o <code>execute</code> no es una función.',
+      'fn.defineTool.throws2': 'Si <code>name</code> no cumple el charset/longitud del spec de WebMCP (<code>[A-Za-z0-9_.-]{1,128}</code>) &mdash; falla acá con un mensaje claro, en vez de que el navegador lo rechace después con uno menos útil.',
+      'fn.defineTool.warns1': 'Vía <code>console.warn</code> (nunca lanza) si <code>name</code> supera los 30 caracteres o <code>description</code> los 500 &mdash; los límites que recomienda la <a href="https://developer.chrome.com/docs/ai/webmcp/secure-tools">guía de seguridad de Chrome</a> para resultados confiables del agente.',
       'fn.registerTool.desc': 'El punto de entrada que llama la mayoría del código. Siempre valida vía <code>defineTool</code> primero &mdash; un spec roto lanza de inmediato, tenga o no soporte el navegador, porque un bug en tu spec no es algo que el fallback deba esconder. Después chequea <code>supportsWebMcp()</code>: si no hay soporte, loguea un <code>console.warn</code> nombrando la tool y devuelve <code>false</code> sin tocar el navegador; si hay soporte, llama <code>document.modelContext.registerTool(tool, options)</code> y devuelve <code>true</code>.',
       'fn.registerTool.p_spec': 'Misma forma que el parámetro de <code>defineTool</code>.',
       'fn.registerTool.p_signal': 'Le permite al navegador desregistrar la tool después.',
@@ -764,6 +780,7 @@ toMcpwasmSkillSource(tool, {
       'docs.label_params': 'Parâmetros',
       'docs.label_returns': 'Retorna',
       'docs.label_throws': 'Lança',
+      'docs.label_warns': 'Avisa',
       'docs.label_invariants': 'Invariantes',
       'docs.label_example': 'Exemplo',
       'docs.col_name': 'Nome',
@@ -775,12 +792,15 @@ toMcpwasmSkillSource(tool, {
       'fn.supportsWebMcp.returns': '<code>boolean</code> &mdash; <code>true</code> se este navegador suporta WebMCP.',
       'fn.supportsWebMcp.inv1': 'Nunca lança, seja qual for o formato de <code>document</code> &mdash; ausente, <code>null</code>, não-objeto, ou qualquer outra coisa.',
       'fn.defineTool.desc': 'Valida e normaliza uma definição de tool. Deriva o JSON Schema do seu <code>inputSchema</code> do Zod, e envolve <code>execute</code> para que cada chamada seja validada contra esse schema antes de rodar seu handler. Pura &mdash; nunca toca <code>document.modelContext</code> diretamente.',
-      'fn.defineTool.p_name': 'Nome da tool, não vazio.',
+      'fn.defineTool.p_name': 'Não vazio, 1-128 caracteres, apenas letras/números/"_"/"-"/"." (o charset do próprio spec de WebMCP).',
       'fn.defineTool.p_desc': 'Descrição não vazia, mostrada ao agente.',
       'fn.defineTool.p_schema': 'Um schema do Zod descrevendo a entrada da tool.',
       'fn.defineTool.p_execute': 'Seu handler. Recebe a entrada validada e tipada, mais <code>{ signal: AbortSignal }</code>.',
-      'fn.defineTool.returns': '<code>DefinedTool</code> &mdash; <code>{ name, description, inputSchema, execute }</code>, com <code>inputSchema</code> como JSON Schema e <code>execute</code> envolvido e assíncrono.',
+      'fn.defineTool.p_annotations': 'Opcional. Repassado tal como está para <code>document.modelContext.registerTool()</code> &mdash; omitido do resultado por completo quando não é passado.',
+      'fn.defineTool.returns': '<code>DefinedTool</code> &mdash; <code>{ name, description, inputSchema, execute, annotations? }</code>, com <code>inputSchema</code> como JSON Schema e <code>execute</code> envolvido e assíncrono.',
       'fn.defineTool.throws1': 'Sincronamente, antes de fazer qualquer outra coisa, se <code>name</code> ou <code>description</code> estiverem vazios ou não forem string, ou <code>execute</code> não for uma função.',
+      'fn.defineTool.throws2': 'Se <code>name</code> não corresponder ao charset/tamanho do spec de WebMCP (<code>[A-Za-z0-9_.-]{1,128}</code>) &mdash; falha aqui com uma mensagem clara, em vez do navegador rejeitá-lo depois com uma menos útil.',
+      'fn.defineTool.warns1': 'Via <code>console.warn</code> (nunca lança) se <code>name</code> ultrapassar 30 caracteres ou <code>description</code> ultrapassar 500 &mdash; os limites que o <a href="https://developer.chrome.com/docs/ai/webmcp/secure-tools">guia de segurança do Chrome</a> recomenda para resultados confiáveis do agente.',
       'fn.registerTool.desc': 'O ponto de entrada que a maioria do código chama. Sempre valida via <code>defineTool</code> primeiro &mdash; um spec quebrado lança imediatamente, tendo ou não suporte o navegador, porque um bug no seu spec não é algo que o fallback deva esconder. Depois verifica <code>supportsWebMcp()</code>: se não suportado, registra um <code>console.warn</code> nomeando a tool e retorna <code>false</code> sem tocar o navegador; se suportado, chama <code>document.modelContext.registerTool(tool, options)</code> e retorna <code>true</code>.',
       'fn.registerTool.p_spec': 'Mesmo formato do parâmetro de <code>defineTool</code>.',
       'fn.registerTool.p_signal': 'Permite ao navegador cancelar o registro da tool depois.',
