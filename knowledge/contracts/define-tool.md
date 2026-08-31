@@ -15,7 +15,7 @@ budget:
   lines_max: 40
   params_max: 1
 tests: "tests_ts/define-tool.test.ts"
-tests_sha256: "ba6702954bc7fed3a5debd71801bbce8859dc3da62a626d14727c65e24142341"
+tests_sha256: "97bfad186b1daf421d299fe62837ef7142621d724adc65a0d3187924fd64aaa1"
 touch_only: ['src_ts/define-tool.ts']
 deps_allowed: ['zod']
 forbids: ['network', 'subprocess', 'llm']
@@ -50,6 +50,7 @@ interface ToolSpec<TSchema extends ZodType> {
   inputSchema: TSchema;
   execute: (input: z.infer<TSchema>, context: { signal: AbortSignal }) => unknown;
   annotations?: ToolAnnotations;
+  title?: string;
 }
 
 interface DefinedTool {
@@ -58,6 +59,7 @@ interface DefinedTool {
   inputSchema: Record<string, unknown>; // JSON Schema
   execute: (rawInput: unknown, context: { signal: AbortSignal }) => Promise<unknown>;
   annotations?: ToolAnnotations;
+  title?: string;
 }
 
 function defineTool<TSchema extends ZodType>(spec: ToolSpec<TSchema>): DefinedTool
@@ -81,6 +83,10 @@ function defineTool<TSchema extends ZodType>(spec: ToolSpec<TSchema>): DefinedTo
   shape `ToolAnnotations` que espera `document.modelContext.registerTool()`). Si esta
   ausente, la clave `annotations` NO aparece en el objeto devuelto (no se manda `undefined`
   ni un objeto vacio al navegador).
+- Si `spec.title` esta presente, se copia tal cual (mismo campo opcional `title` que define
+  `ModelContextTool` en el spec real, verificado con fuente primaria, CONTRACT-48). Si esta
+  ausente, la clave `title` NO aparece en el objeto devuelto. Sin validacion de formato --
+  el spec no le impone ninguna al `title` (a diferencia de `name`).
 - El `inputSchema` devuelto es siempre el resultado de `z.toJSONSchema(spec.inputSchema)`
   — nunca el objeto Zod crudo.
 - El `execute` devuelto SIEMPRE parsea (`spec.inputSchema.parse(rawInput)`) antes de llamar
@@ -99,6 +105,8 @@ function defineTool<TSchema extends ZodType>(spec: ToolSpec<TSchema>): DefinedTo
 - `defineTool({ ..., execute: 'not-a-function' })` -> lanza `Error: defineTool: execute must be a function`
 - `defineTool({ name: 'get_price', ..., annotations: { readOnlyHint: true } })` -> el objeto
   devuelto incluye `annotations: { readOnlyHint: true }`.
+- `defineTool({ name: 'get_price', ..., title: 'Get Price' })` -> el objeto devuelto incluye
+  `title: 'Get Price'`.
 - `defineTool({ name: 'a'.repeat(35), ... })` -> no lanza, pero emite `console.warn` con
   "tool name is 35 characters; Chrome recommends <=30...".
 - `tool.execute({ name: 42 }, { signal })` (donde el schema espera `string`) -> promesa

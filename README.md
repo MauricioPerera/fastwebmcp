@@ -44,7 +44,8 @@ breaks on an unsupported browser.
 Chrome's [tool security guide](https://developer.chrome.com/docs/ai/webmcp/secure-tools)
 recommends for reliable agent results. Pass `annotations: { readOnlyHint, untrustedContentHint }`
 to flag a tool as side-effect-free or as returning untrusted data — it's forwarded as-is
-to `document.modelContext.registerTool()`.
+to `document.modelContext.registerTool()`. Pass `title` for an optional human-readable
+label; also forwarded as-is.
 
 ## Declarative API
 

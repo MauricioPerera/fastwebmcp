@@ -11,6 +11,7 @@ export interface ToolSpec<TSchema extends ZodType> {
   inputSchema: TSchema;
   execute: (input: z.infer<TSchema>, context: { signal: AbortSignal }) => unknown;
   annotations?: ToolAnnotations;
+  title?: string;
 }
 
 export interface DefinedTool {
@@ -19,6 +20,7 @@ export interface DefinedTool {
   inputSchema: Record<string, unknown>;
   execute: (rawInput: unknown, context: { signal: AbortSignal }) => Promise<unknown>;
   annotations?: ToolAnnotations;
+  title?: string;
 }
 
 // Name charset/length per the WebMCP spec (webmachinelearning.github.io/webmcp): 1-128
@@ -58,6 +60,7 @@ export function defineTool<TSchema extends ZodType>(spec: ToolSpec<TSchema>): De
     description: spec.description,
     inputSchema: spec.inputSchema.toJSONSchema() as Record<string, unknown>,
     ...(spec.annotations !== undefined ? { annotations: spec.annotations } : {}),
+    ...(spec.title !== undefined ? { title: spec.title } : {}),
     execute: async (rawInput, context) => {
       const parsed = spec.inputSchema.parse(rawInput);
       return spec.execute(parsed, context);

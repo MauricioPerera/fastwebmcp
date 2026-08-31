@@ -140,6 +140,29 @@ test('omits annotations from the returned tool entirely when not provided', () =
   assert.equal('annotations' in tool, false);
 });
 
+test('passes title through to the returned tool when provided', () => {
+  const tool = defineTool({
+    name: 'get_price',
+    description: 'Reads the current price.',
+    inputSchema: z.object({}),
+    execute: async () => '$10',
+    title: 'Get Price',
+  });
+
+  assert.equal(tool.title, 'Get Price');
+});
+
+test('omits title from the returned tool entirely when not provided', () => {
+  const tool = defineTool({
+    name: 'get_price',
+    description: 'Reads the current price.',
+    inputSchema: z.object({}),
+    execute: async () => '$10',
+  });
+
+  assert.equal('title' in tool, false);
+});
+
 test('throws when name contains a character outside [A-Za-z0-9_.-]', () => {
   assert.throws(
     () =>

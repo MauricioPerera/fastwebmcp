@@ -4,6 +4,20 @@ All notable changes to the KDD Template are documented here.
 
 ## Unreleased
 
+**Contract 48 — Campo title en defineTool()** ([C48-REPORT](docs/reports/CONTRACT-48-REPORT.md))
+
+Siguiendo el mismo flujo de auditoria que encontro `annotations` en CONTRACT-47, se
+volvio a leer el spec real de WebMCP y se confirmo que `ModelContextTool` tambien define
+`title` (`USVString` opcional, sin restriccion de formato) -- ausente de fastwebmcp por
+completo. Un agente de auditoria dedicado descarto ademas otros candidatos antes de
+elegir este: el evento `toolchange` (real pero sin shape documentado en el spec, mismo
+motivo que `outputSchema` para no implementarlo todavia), drift en `createWebMcpMock`
+(ninguno), gaps en la API Declarativa contra el explainer real (ninguno), documentacion
+desactualizada (ninguna, ya cerrada en commits posteriores a CONTRACT-47), CI/lint e
+issues abiertos en GitHub (nada). `defineTool()` ahora acepta `title?: string` y lo copia
+tal cual al objeto devuelto -- ausente si no se paso. Oraculo re-sellado (15 -> 17 tests).
+`node --test "tests_ts/*.test.ts"`: 55/55 verde, 2x, sin regresiones cruzadas esta vez.
+
 **Contract 47 — Annotations, formato de name y avisos de presupuesto en defineTool()** ([C47-REPORT](docs/reports/CONTRACT-47-REPORT.md))
 
 A raiz de escanear el propio sitio en `webmcp.com` (grade B+, senalo "No result schemas
