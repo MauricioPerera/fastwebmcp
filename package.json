@@ -1,6 +1,6 @@
 {
   "name": "fastwebmcp",
-  "version": "0.2.7",
+  "version": "0.3.0",
   "description": "FastMCP-style ergonomics for WebMCP: typed builders over the Imperative and Declarative browser APIs.",
   "type": "module",
   "license": "MIT",
