@@ -7,6 +7,9 @@ export interface WebMcpMock {
   document: { modelContext: { registerTool: (tool: unknown, options?: unknown) => void } };
   registeredTools: Map<string, RegisteredMockTool>;
   invokeTool: (name: string, input: unknown, context?: { signal: AbortSignal }) => Promise<unknown>;
+  hasTool: (name: string) => boolean;
+  getTool: (name: string) => RegisteredMockTool | undefined;
+  reset: () => void;
 }
 
 export function createWebMcpMock(): WebMcpMock {
@@ -34,5 +37,13 @@ export function createWebMcpMock(): WebMcpMock {
     return entry.tool.execute(input, { signal });
   };
 
-  return { document, registeredTools, invokeTool };
+  const hasTool = (name: string): boolean => registeredTools.has(name);
+
+  const getTool = (name: string): RegisteredMockTool | undefined => registeredTools.get(name);
+
+  const reset = (): void => {
+    registeredTools.clear();
+  };
+
+  return { document, registeredTools, invokeTool, hasTool, getTool, reset };
 }

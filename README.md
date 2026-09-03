@@ -85,10 +85,16 @@ globalThis.document = mock.document as any;
 registerYourTools();
 
 const result = await mock.invokeTool('add_todo', { text: 'Buy milk' });
+
+// Check registrations and clean up between tests
+mock.hasTool('add_todo'); // true
+mock.reset(); // clears all registered tools for the next test
 ```
 
 `invokeTool` runs the real `execute` your tool was registered with (Zod parsing
-included) — not a reimplementation.
+included) — not a reimplementation. `hasTool(name)`, `getTool(name)` and `reset()`
+make it easy to assert tool registrations and isolate tests in suites like Jest, Vitest,
+or `node:test`.
 
 ## Publishing the same schema to mcpwasm
 
