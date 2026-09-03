@@ -762,14 +762,18 @@ toMcpwasmSkillSource(tool, {
       registered with &mdash; Zod parsing included.
     </p>
     <div class="code-panel" style="margin-top:1.75rem; max-width: 62ch;">
-<pre><span class="kw">import</span> { createWebMcpMock } <span class="kw">from</span> <span class="str">'fastwebmcp'</span>;
+<pre><span class="kw">import</span> { createWebMcpMock, withMockDocument } <span class="kw">from</span> <span class="str">'fastwebmcp'</span>;
 
 <span class="kw">const</span> mock = createWebMcpMock();
-globalThis.document = mock.document;
 
-registerYourTools();
+<span class="com">// Run tests safely without polluting globalThis:</span>
+<span class="kw">const</span> result = <span class="kw">await</span> withMockDocument(mock, <span class="kw">async</span> () => {
+  registerYourTools();
+  <span class="kw">return</span> mock.invokeTool(<span class="str">'add_todo'</span>, { text: <span class="str">'Buy milk'</span> });
+});
 
-<span class="kw">const</span> result = <span class="kw">await</span> mock.invokeTool(<span class="str">'add_todo'</span>, { text: <span class="str">'Buy milk'</span> });</pre>
+mock.hasTool(<span class="str">'add_todo'</span>); <span class="com">// true</span>
+mock.reset(); <span class="com">// clean up for the next test</span></pre>
     </div>
   </div>
 </section>

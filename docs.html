@@ -339,7 +339,7 @@
     <p class="eyebrow" data-i18n="docs.eyebrow">API Reference</p>
     <h1 data-i18n="docs.h1">Every export, in detail.</h1>
     <p data-i18n="docs.lede">
-      Seven functions, all of it. Signatures, parameters, return values, what throws and
+      Nine functions, all of it. Signatures, parameters, return values, what throws and
       when, and a real example for each &mdash; several of them the exact code verified
       against a real browser and the real mcpwasm sandbox.
     </p>
@@ -356,6 +356,8 @@
       <a href="#respondToAgentSubmit">respondToAgentSubmit()</a>
       <span class="group-label" data-i18n="docs.group_testing">Testing</span>
       <a href="#createWebMcpMock">createWebMcpMock()</a>
+      <a href="#withMockDocument">withMockDocument()</a>
+      <a href="#createMockAgentSubmitEvent">createMockAgentSubmitEvent()</a>
       <span class="group-label" data-i18n="docs.group_mcpwasm">mcpwasm</span>
       <a href="#toMcpwasmSkillSource">toMcpwasmSkillSource()</a>
     </nav>
@@ -506,6 +508,13 @@
         <ul class="invariants">
           <li data-i18n="fn.defineDeclarativeTool.throws1">Same fail-fast as <code>defineTool</code> for <code>name</code>/<code>description</code>.</li>
           <li data-i18n="fn.defineDeclarativeTool.throws2">If a field name in <code>spec.fields</code> has no matching control in <code>form.elements</code>.</li>
+          <li data-i18n="fn.defineDeclarativeTool.throws3">If <code>name</code> does not match the WebMCP charset/length pattern (<code>[A-Za-z0-9_.-]{1,128}</code>).</li>
+          <li data-i18n="fn.defineDeclarativeTool.atomic">Atomic: if validation fails on any field, the form remains completely untouched.</li>
+        </ul>
+
+        <span class="fn-meta-label" data-i18n="docs.label_warns">Warns</span>
+        <ul class="invariants">
+          <li data-i18n="fn.defineDeclarativeTool.warns1">Via <code>console.warn</code> (never throws) if <code>name</code> exceeds 30 characters or <code>description</code> exceeds 500 per Chrome recommendations.</li>
         </ul>
 
         <span class="fn-meta-label" data-i18n="docs.label_example">Example</span>
@@ -572,16 +581,77 @@
         <ul class="invariants">
           <li data-i18n="fn.createWebMcpMock.inv1"><code>invokeTool</code> rejects with a clear error if no tool is registered under that name.</li>
           <li data-i18n="fn.createWebMcpMock.inv2">Defaults <code>context.signal</code> to a fresh <code>AbortSignal</code> if you don't provide one.</li>
+          <li data-i18n="fn.createWebMcpMock.inv3">Supports automatic unregistration via <code>options.signal</code> (<code>AbortSignal</code>) &mdash; aborting deletes the tool from the mock.</li>
+          <li data-i18n="fn.createWebMcpMock.inv4">Exposes <code>hasTool(name)</code>, <code>getTool(name)</code>, and <code>reset()</code> helpers for test assertions and cleanup.</li>
         </ul>
 
         <span class="fn-meta-label" data-i18n="docs.label_example">Example</span>
         <div class="code-panel">
 <pre><span class="kw">const</span> mock = createWebMcpMock();
-globalThis.document = mock.document;
 
-registerYourTools();
+<span class="com">// Safely test without polluting globalThis:</span>
+<span class="kw">await</span> withMockDocument(mock, <span class="kw">async</span> () => {
+  registerYourTools();
+  <span class="kw">const</span> result = <span class="kw">await</span> mock.invokeTool(<span class="str">'add_todo'</span>, { text: <span class="str">'Buy milk'</span> });
+});
 
-<span class="kw">const</span> result = <span class="kw">await</span> mock.invokeTool(<span class="str">'add_todo'</span>, { text: <span class="str">'Buy milk'</span> });</pre>
+mock.hasTool(<span class="str">'add_todo'</span>); <span class="com">// true</span>
+mock.reset(); <span class="com">// clean up for next test</span></pre>
+        </div>
+      </section>
+
+      <section class="fn-section" id="withMockDocument">
+        <h2>withMockDocument(mock, fn)</h2>
+        <div class="fn-signature">function withMockDocument&lt;T&gt;(mock: WebMcpMock, fn: () =&gt; T): T</div>
+        <p class="desc" data-i18n="fn.withMockDocument.desc">
+          Installs <code>mock.document</code> on <code>globalThis.document</code> for the duration
+          of <code>fn()</code> and restores the original property descriptor in a
+          <code>try...finally</code> block, so tests never leak globals.
+        </p>
+
+        <span class="fn-meta-label" data-i18n="docs.label_params">Parameters</span>
+        <table class="param-table">
+          <tr><th data-i18n="docs.col_name">Name</th><th data-i18n="docs.col_type">Type</th><th data-i18n="docs.col_desc">Description</th></tr>
+          <tr><td><code>mock</code></td><td><code>WebMcpMock</code></td><td class="pdesc" data-i18n="fn.withMockDocument.p_mock">The mock instance returned by <code>createWebMcpMock()</code>.</td></tr>
+          <tr><td><code>fn</code></td><td><code>() =&gt; T</code></td><td class="pdesc" data-i18n="fn.withMockDocument.p_fn">The callback to execute within the isolated document scope.</td></tr>
+        </table>
+
+        <span class="fn-meta-label" data-i18n="docs.label_returns">Returns</span>
+        <p data-i18n="fn.withMockDocument.returns"><code>T</code> &mdash; the return value of <code>fn()</code> (sync or async).</p>
+
+        <span class="fn-meta-label" data-i18n="docs.label_example">Example</span>
+        <div class="code-panel">
+<pre><span class="kw">const</span> mock = createWebMcpMock();
+
+<span class="kw">const</span> result = <span class="kw">await</span> withMockDocument(mock, <span class="kw">async</span> () =&gt; {
+  registerYourTools();
+  <span class="kw">return</span> mock.invokeTool(<span class="str">'add_todo'</span>, { text: <span class="str">'Buy milk'</span> });
+});</pre>
+        </div>
+      </section>
+
+      <section class="fn-section" id="createMockAgentSubmitEvent">
+        <h2>createMockAgentSubmitEvent()</h2>
+        <div class="fn-signature">function createMockAgentSubmitEvent(): MockAgentSubmitEvent</div>
+        <p class="desc" data-i18n="fn.createMockAgentSubmitEvent.desc">
+          Builds an agent submit event for declarative forms (<code>agentInvoked: true</code>)
+          that captures the promise passed to <code>respondWith()</code>; calling
+          <code>waitForResponse()</code> awaits and returns the result.
+        </p>
+
+        <span class="fn-meta-label" data-i18n="docs.label_params">Parameters</span>
+        <p data-i18n="fn.createMockAgentSubmitEvent.params">None.</p>
+
+        <span class="fn-meta-label" data-i18n="docs.label_returns">Returns</span>
+        <p data-i18n="fn.createMockAgentSubmitEvent.returns"><code>MockAgentSubmitEvent</code> &mdash; <code>{ event: AgentSubmitEventLike, waitForResponse: () =&gt; Promise&lt;unknown&gt; }</code>.</p>
+
+        <span class="fn-meta-label" data-i18n="docs.label_example">Example</span>
+        <div class="code-panel">
+<pre><span class="kw">const</span> { event, waitForResponse } = createMockAgentSubmitEvent();
+
+respondToAgentSubmit(event, () =&gt; ({ status: <span class="str">'processed'</span> }));
+
+<span class="kw">const</span> response = <span class="kw">await</span> waitForResponse(); <span class="com">// { status: 'processed' }</span></pre>
         </div>
       </section>
 
@@ -645,7 +715,7 @@ toMcpwasmSkillSource(tool, {
       'theme.toggle': 'Toggle color theme',
       'docs.eyebrow': 'API Reference',
       'docs.h1': 'Every export, in detail.',
-      'docs.lede': 'Seven functions, all of it. Signatures, parameters, return values, what throws and when, and a real example for each &mdash; several of them the exact code verified against a real browser and the real mcpwasm sandbox.',
+      'docs.lede': 'Nine functions, all of it. Signatures, parameters, return values, what throws and when, and a real example for each &mdash; several of them the exact code verified against a real browser and the real mcpwasm sandbox.',
       'docs.group_imperative': 'Imperative',
       'docs.group_declarative': 'Declarative',
       'docs.group_testing': 'Testing',
@@ -698,6 +768,18 @@ toMcpwasmSkillSource(tool, {
       'fn.createWebMcpMock.returns': '<code>WebMcpMock</code> &mdash; <code>{ document, registeredTools, invokeTool(name, input, context?) }</code>.',
       'fn.createWebMcpMock.inv1': '<code>invokeTool</code> rejects with a clear error if no tool is registered under that name.',
       'fn.createWebMcpMock.inv2': 'Defaults <code>context.signal</code> to a fresh <code>AbortSignal</code> if you don\'t provide one.',
+      'fn.createWebMcpMock.inv3': 'Supports automatic tool unregistration via <code>options.signal</code> (<code>AbortSignal</code>) &mdash; aborting the signal removes the tool from the mock.',
+      'fn.createWebMcpMock.inv4': 'Exposes <code>hasTool(name)</code>, <code>getTool(name)</code>, and <code>reset()</code> helpers for test assertions and cleanup.',
+      'fn.defineDeclarativeTool.throws3': 'If <code>name</code> doesn\'t match the WebMCP spec\'s charset/length (<code>[A-Za-z0-9_.-]{1,128}</code>).',
+      'fn.defineDeclarativeTool.atomic': 'Atomic: if a field control is missing, the form is left completely untouched (no attributes set).',
+      'fn.defineDeclarativeTool.warns1': 'Via <code>console.warn</code> (never throws) if <code>name</code> exceeds 30 characters or <code>description</code> exceeds 500 per Chrome recommendations.',
+      'fn.withMockDocument.desc': 'Safely installs <code>mock.document</code> on <code>globalThis.document</code> for the duration of <code>fn()</code> and restores the original descriptor in a <code>try...finally</code> block, so tests never leak globals.',
+      'fn.withMockDocument.p_mock': 'The mock instance created by <code>createWebMcpMock()</code>.',
+      'fn.withMockDocument.p_fn': 'The test callback to run within the mock document context.',
+      'fn.withMockDocument.returns': '<code>T</code> &mdash; returns the result of <code>fn()</code> (sync or async).',
+      'fn.createMockAgentSubmitEvent.desc': 'Builds an agent submit event for declarative forms (<code>agentInvoked: true</code>) that captures the promise passed to <code>respondWith()</code>; calling <code>waitForResponse()</code> awaits it.',
+      'fn.createMockAgentSubmitEvent.params': 'None.',
+      'fn.createMockAgentSubmitEvent.returns': '<code>MockAgentSubmitEvent</code> &mdash; <code>{ event, waitForResponse() }</code>.',
       'fn.toMcpwasmSkillSource.desc': 'Reuses the schema a <code>DefinedTool</code> already carries to emit the <code>registerTool({...})</code> source a real <a href="https://github.com/MauricioPerera/mcpwasm">mcpwasm</a> <code>tool.js</code> expects &mdash; verified against the real mcpwasm sandbox, not just checked for valid syntax. Schema-only: it never tries to translate <code>execute</code>, which exists to touch a DOM the sandbox doesn\'t have.',
       'fn.toMcpwasmSkillSource.p_tool': 'The output of <code>defineTool()</code>.',
       'fn.toMcpwasmSkillSource.p_body': 'Raw JS text for the sandboxed handler\'s body; defaults to a <code>TODO</code> stub naming the sandbox\'s constraints.',
@@ -710,7 +792,7 @@ toMcpwasmSkillSource(tool, {
       'theme.toggle': 'Cambiar tema de color',
       'docs.eyebrow': 'Referencia de API',
       'docs.h1': 'Cada export, en detalle.',
-      'docs.lede': 'Siete funciones, todo. Firmas, parámetros, valores de retorno, qué lanza y cuándo, y un ejemplo real para cada una &mdash; varios son el código exacto verificado contra un navegador real y el sandbox real de mcpwasm.',
+      'docs.lede': 'Nueve funciones, todo. Firmas, parámetros, valores de retorno, qué lanza y cuándo, y un ejemplo real para cada una &mdash; varios son el código exacto verificado contra un navegador real y el sandbox real de mcpwasm.',
       'docs.group_imperative': 'Imperativa',
       'docs.group_declarative': 'Declarativa',
       'docs.group_testing': 'Testing',
@@ -763,6 +845,18 @@ toMcpwasmSkillSource(tool, {
       'fn.createWebMcpMock.returns': '<code>WebMcpMock</code> &mdash; <code>{ document, registeredTools, invokeTool(name, input, context?) }</code>.',
       'fn.createWebMcpMock.inv1': '<code>invokeTool</code> rechaza con un error claro si no hay ninguna tool registrada con ese nombre.',
       'fn.createWebMcpMock.inv2': 'Si no proveés uno, usa un <code>AbortSignal</code> fresco por default para <code>context.signal</code>.',
+      'fn.createWebMcpMock.inv3': 'Soporta desregistro automático mediante <code>options.signal</code> (<code>AbortSignal</code>) &mdash; abortar el signal elimina la tool del mock.',
+      'fn.createWebMcpMock.inv4': 'Expone los helpers <code>hasTool(name)</code>, <code>getTool(name)</code> y <code>reset()</code> para aserciones y limpieza en tests.',
+      'fn.defineDeclarativeTool.throws3': 'Si <code>name</code> no cumple el charset/longitud del spec de WebMCP (<code>[A-Za-z0-9_.-]{1,128}</code>).',
+      'fn.defineDeclarativeTool.atomic': 'Atómico: si falla la validación de algún campo, el formulario queda completamente intacto (sin atributos).',
+      'fn.defineDeclarativeTool.warns1': 'Vía <code>console.warn</code> (nunca lanza) si <code>name</code> supera 30 caracteres o <code>description</code> supera 500 según recomendaciones de Chrome.',
+      'fn.withMockDocument.desc': 'Instala <code>mock.document</code> en <code>globalThis.document</code> durante <code>fn()</code> y restaura el descriptor original en <code>try...finally</code>, evitando fugas globales entre tests.',
+      'fn.withMockDocument.p_mock': 'La instancia mock creada por <code>createWebMcpMock()</code>.',
+      'fn.withMockDocument.p_fn': 'El callback de prueba a ejecutar dentro del contexto del documento mock.',
+      'fn.withMockDocument.returns': '<code>T</code> &mdash; devuelve el resultado de <code>fn()</code> (sincrónico o asincrónico).',
+      'fn.createMockAgentSubmitEvent.desc': 'Construye un evento de envío de agente para formularios declarativos (<code>agentInvoked: true</code>) que captura la promesa de <code>respondWith()</code>; <code>waitForResponse()</code> la espera.',
+      'fn.createMockAgentSubmitEvent.params': 'Ninguno.',
+      'fn.createMockAgentSubmitEvent.returns': '<code>MockAgentSubmitEvent</code> &mdash; <code>{ event, waitForResponse() }</code>.',
       'fn.toMcpwasmSkillSource.desc': 'Reusa el schema que un <code>DefinedTool</code> ya trae para emitir el <code>registerTool({...})</code> que un <code>tool.js</code> real de <a href="https://github.com/MauricioPerera/mcpwasm">mcpwasm</a> espera &mdash; verificado contra el sandbox real de mcpwasm, no solo chequeado como sintaxis válida. Solo schema: nunca intenta traducir <code>execute</code>, que existe para tocar un DOM que el sandbox no tiene.',
       'fn.toMcpwasmSkillSource.p_tool': 'El output de <code>defineTool()</code>.',
       'fn.toMcpwasmSkillSource.p_body': 'Texto JS crudo para el cuerpo del handler sandboxeado; default: un stub <code>TODO</code> que nombra las restricciones del sandbox.',
@@ -775,7 +869,7 @@ toMcpwasmSkillSource(tool, {
       'theme.toggle': 'Alternar tema de cor',
       'docs.eyebrow': 'Referência de API',
       'docs.h1': 'Cada export, em detalhe.',
-      'docs.lede': 'Sete funções, tudo. Assinaturas, parâmetros, valores de retorno, o que lança e quando, e um exemplo real para cada uma &mdash; vários são o código exato verificado contra um navegador real e o sandbox real do mcpwasm.',
+      'docs.lede': 'Nove funções, tudo. Assinaturas, parâmetros, valores de retorno, o que lança e quando, e um exemplo real para cada uma &mdash; vários são o código exato verificado contra um navegador real e o sandbox real do mcpwasm.',
       'docs.group_imperative': 'Imperativa',
       'docs.group_declarative': 'Declarativa',
       'docs.group_testing': 'Testes',
@@ -828,6 +922,18 @@ toMcpwasmSkillSource(tool, {
       'fn.createWebMcpMock.returns': '<code>WebMcpMock</code> &mdash; <code>{ document, registeredTools, invokeTool(name, input, context?) }</code>.',
       'fn.createWebMcpMock.inv1': '<code>invokeTool</code> rejeita com um erro claro se nenhuma tool estiver registrada com esse nome.',
       'fn.createWebMcpMock.inv2': 'Usa um <code>AbortSignal</code> novo por padrão para <code>context.signal</code> se você não fornecer um.',
+      'fn.createWebMcpMock.inv3': 'Suporta desregistro automático via <code>options.signal</code> (<code>AbortSignal</code>) &mdash; abortar o signal remove a tool do mock.',
+      'fn.createWebMcpMock.inv4': 'Expõe <code>hasTool(name)</code>, <code>getTool(name)</code> e <code>reset()</code> para asserções e limpeza de testes.',
+      'fn.defineDeclarativeTool.throws3': 'Se <code>name</code> não corresponder ao charset/tamanho do spec de WebMCP (<code>[A-Za-z0-9_.-]{1,128}</code>).',
+      'fn.defineDeclarativeTool.atomic': 'Atômico: se a validação de um campo falhar, o formulário permanece completamente intacto.',
+      'fn.defineDeclarativeTool.warns1': 'Via <code>console.warn</code> se <code>name</code> ultrapassar 30 caracteres ou <code>description</code> ultrapassar 500 conforme o Chrome.',
+      'fn.withMockDocument.desc': 'Instala <code>mock.document</code> em <code>globalThis.document</code> durante <code>fn()</code> e restaura o descritor original em <code>try...finally</code>.',
+      'fn.withMockDocument.p_mock': 'A instância mock retornada por <code>createWebMcpMock()</code>.',
+      'fn.withMockDocument.p_fn': 'O callback de teste a executar dentro do contexto isolado.',
+      'fn.withMockDocument.returns': '<code>T</code> &mdash; retorna o resultado de <code>fn()</code> (síncrono ou assíncrono).',
+      'fn.createMockAgentSubmitEvent.desc': 'Cria um evento de envio de agente para formulários declarativos (<code>agentInvoked: true</code>) que captura a promessa de <code>respondWith()</code>.',
+      'fn.createMockAgentSubmitEvent.params': 'Nenhum.',
+      'fn.createMockAgentSubmitEvent.returns': '<code>MockAgentSubmitEvent</code> &mdash; <code>{ event, waitForResponse() }</code>.',
       'fn.toMcpwasmSkillSource.desc': 'Reaproveita o schema que um <code>DefinedTool</code> já carrega para emitir o <code>registerTool({...})</code> que um <code>tool.js</code> real do <a href="https://github.com/MauricioPerera/mcpwasm">mcpwasm</a> espera &mdash; verificado contra o sandbox real do mcpwasm, não só checado como sintaxe válida. Só schema: nunca tenta traduzir <code>execute</code>, que existe para tocar um DOM que o sandbox não tem.',
       'fn.toMcpwasmSkillSource.p_tool': 'A saída de <code>defineTool()</code>.',
       'fn.toMcpwasmSkillSource.p_body': 'Texto JS bruto para o corpo do handler isolado; padrão: um stub <code>TODO</code> nomeando as restrições do sandbox.',
