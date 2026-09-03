@@ -77,24 +77,78 @@ this library computes or validates — that algorithm is still unspecified upstr
 ## Testing your own tools without a real browser
 
 ```ts
-import { createWebMcpMock } from 'fastwebmcp';
+import {
+  createWebMcpMock,
+  withMockDocument,
+  createMockAgentSubmitEvent,
+  respondToAgentSubmit,
+} from 'fastwebmcp';
 
 const mock = createWebMcpMock();
-globalThis.document = mock.document as any;
 
-registerYourTools();
+// Isolated execution without polluting globalThis:
+await withMockDocument(mock, async () => {
+  registerYourTools();
+  const result = await mock.invokeTool('add_todo', { text: 'Buy milk' });
+});
 
-const result = await mock.invokeTool('add_todo', { text: 'Buy milk' });
-
-// Check registrations and clean up between tests
+// Check registrations and clean up between tests:
 mock.hasTool('add_todo'); // true
 mock.reset(); // clears all registered tools for the next test
+
+// Unregistration via AbortSignal (WebMCP spec):
+const controller = new AbortController();
+registerTool(mySpec, { signal: controller.signal });
+controller.abort(); // tool is automatically removed from mock
+
+// Testing declarative form submissions:
+const { event, waitForResponse } = createMockAgentSubmitEvent();
+respondToAgentSubmit(event, () => ({ status: 'processed' }));
+const response = await waitForResponse(); // { status: 'processed' }
 ```
 
 `invokeTool` runs the real `execute` your tool was registered with (Zod parsing
-included) — not a reimplementation. `hasTool(name)`, `getTool(name)` and `reset()`
+included) — not a reimplementation. `withMockDocument` isolates `globalThis.document`
+safely with `try...finally`, and `hasTool(name)`, `getTool(name)` and `reset()`
 make it easy to assert tool registrations and isolate tests in suites like Jest, Vitest,
 or `node:test`.
+
+## Framework Integration (React, Next.js, Vue)
+
+WebMCP tools in single-page applications should register when components mount and
+clean up when they unmount using an `AbortController`:
+
+### React / Next.js
+```tsx
+import { useEffect } from 'react';
+import { registerTool, type ToolSpec } from 'fastwebmcp';
+import type { ZodType } from 'zod';
+
+export function useWebMcpTool<T extends ZodType>(spec: ToolSpec<T>) {
+  useEffect(() => {
+    const controller = new AbortController();
+    registerTool(spec, { signal: controller.signal });
+    return () => controller.abort(); // Automatically unregisters on unmount
+  }, [spec.name]);
+}
+```
+
+### Vue 3 (Composition API)
+```ts
+import { onMounted, onUnmounted } from 'vue';
+import { registerTool, type ToolSpec } from 'fastwebmcp';
+import type { ZodType } from 'zod';
+
+export function useWebMcpTool<T extends ZodType>(spec: ToolSpec<T>) {
+  const controller = new AbortController();
+  onMounted(() => {
+    registerTool(spec, { signal: controller.signal });
+  });
+  onUnmounted(() => {
+    controller.abort();
+  });
+}
+```
 
 ## Publishing the same schema to mcpwasm
 
