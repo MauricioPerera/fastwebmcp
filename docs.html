@@ -108,6 +108,8 @@
     line-height: 1.65;
     margin: 0;
     overflow-x: auto;
+    max-width: 100%;
+    -webkit-overflow-scrolling: touch;
     color: var(--code-ink);
   }
   pre .kw { color: var(--structure); }
@@ -120,6 +122,8 @@
     border-radius: 3px;
     padding: 1.1rem 1.25rem;
     max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   /* ---------- Nav ---------- */
@@ -285,7 +289,11 @@
     border-radius: 3px;
     padding: 0.75rem 1rem;
     margin: 1rem 0;
+    max-width: 100%;
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    white-space: pre-wrap;
+    word-break: break-word;
     color: var(--code-ink);
   }
   .fn-section > p.desc { margin: 1rem 0 0; max-width: 62ch; color: var(--ink-soft); }
@@ -300,10 +308,24 @@
     margin: 1.5rem 0 0.6rem;
   }
 
-  .param-table { width: 100%; border-collapse: collapse; font-size: 0.92rem; max-width: 62ch; }
-  .param-table th, .param-table td { text-align: left; padding: 0.5rem 0.9rem 0.5rem 0; border-bottom: 1px solid var(--surface-line); vertical-align: top; }
+  .param-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.92rem;
+    max-width: 100%;
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .param-table th, .param-table td {
+    text-align: left;
+    padding: 0.5rem 0.9rem 0.5rem 0;
+    border-bottom: 1px solid var(--surface-line);
+    vertical-align: top;
+    overflow-wrap: break-word;
+  }
   .param-table th { font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 500; }
-  .param-table code { font-size: 0.88rem; }
+  .param-table code { font-size: 0.88rem; word-break: break-word; overflow-wrap: anywhere; }
   .param-table td.pdesc { color: var(--ink-soft); }
 
   ul.invariants { margin: 0; padding-left: 1.15rem; max-width: 62ch; }

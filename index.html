@@ -140,6 +140,8 @@
     line-height: 1.65;
     margin: 0;
     overflow-x: auto;
+    max-width: 100%;
+    -webkit-overflow-scrolling: touch;
     color: var(--code-ink);
   }
   pre .kw { color: var(--structure); }
@@ -152,6 +154,8 @@
     border-radius: 3px;
     padding: 1.1rem 1.25rem;
     max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   /* ---------- Nav ---------- */
@@ -197,7 +201,7 @@
   .navlinks::-webkit-scrollbar { display: none; }
   .navlinks a { color: var(--ink-soft); text-decoration: none; white-space: nowrap; }
   .navlinks a:hover { color: var(--accent); }
-  @media (max-width: 720px) {
+  @media (max-width: 860px) {
     .navlinks { display: none; }
   }
 
@@ -382,6 +386,7 @@
     padding: clamp(1rem, 3vw, 2rem);
     max-width: 100%;
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
   svg { display: block; max-width: 100%; height: auto; }
 
