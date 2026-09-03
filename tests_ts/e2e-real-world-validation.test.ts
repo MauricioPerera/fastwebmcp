@@ -205,3 +205,31 @@ test('CICLO DE VIDA: mock.reset() limpia estado y aisla pruebas', async () => {
     /no tool registered/
   );
 });
+
+test('DESREGISTRO: options.signal abort desregistra la tool del mock', async () => {
+  const mock = createWebMcpMock();
+  const controller = new AbortController();
+
+  withDocument(mock.document, () => {
+    registerTool(
+      {
+        name: 'abortable_tool',
+        description: 'Herramienta cancelable.',
+        inputSchema: z.object({}),
+        execute: async () => 'running',
+      },
+      { signal: controller.signal },
+    );
+  });
+
+  assert.equal(mock.hasTool('abortable_tool'), true);
+  assert.ok(mock.getTool('abortable_tool') !== undefined);
+
+  // Emitimos abort en el signal
+  controller.abort();
+
+  // Debe haberse desregistrado automaticamente
+  assert.equal(mock.hasTool('abortable_tool'), false);
+  assert.equal(mock.getTool('abortable_tool'), undefined);
+});
+

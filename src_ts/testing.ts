@@ -19,7 +19,15 @@ export function createWebMcpMock(): WebMcpMock {
     modelContext: {
       registerTool: (tool: unknown, options?: unknown) => {
         const named = tool as RegisteredMockTool['tool'];
+        const signal = (options as { signal?: AbortSignal } | undefined)?.signal;
+        if (signal?.aborted) {
+          registeredTools.delete(named.name);
+          return;
+        }
         registeredTools.set(named.name, { tool: named, options });
+        signal?.addEventListener('abort', () => {
+          registeredTools.delete(named.name);
+        });
       },
     },
   };
