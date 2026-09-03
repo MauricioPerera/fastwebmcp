@@ -1,3 +1,5 @@
+import type { AgentSubmitEventLike } from './respond-to-agent-submit.ts';
+
 export interface RegisteredMockTool {
   tool: { name: string; execute: (rawInput: unknown, context: { signal: AbortSignal }) => Promise<unknown> };
   options: unknown;
@@ -54,4 +56,54 @@ export function createWebMcpMock(): WebMcpMock {
   };
 
   return { document, registeredTools, invokeTool, hasTool, getTool, reset };
+}
+
+// Installs mock.document on globalThis for the duration of fn() and restores the
+// original property descriptor afterwards, so tests never leak globals. Mirrors
+// withDocument in tests_ts/mock-globals.ts, but shipped in the published package.
+export function withMockDocument<T>(mock: WebMcpMock, fn: () => T): T {
+  const original = Object.getOwnPropertyDescriptor(globalThis, 'document');
+  Object.defineProperty(globalThis, 'document', {
+    value: mock.document,
+    writable: true,
+    enumerable: true,
+    configurable: true,
+  });
+  try {
+    return fn();
+  } finally {
+    if (original) {
+      Object.defineProperty(globalThis, 'document', original);
+    } else {
+      delete (globalThis as { document?: unknown }).document;
+    }
+  }
+}
+
+export interface MockAgentSubmitEvent {
+  event: AgentSubmitEventLike;
+  waitForResponse: () => Promise<unknown>;
+}
+
+// Builds an agent submit event for declarative forms (agentInvoked: true) that
+// captures the promise passed to respondWith(); waitForResponse() awaits it.
+export function createMockAgentSubmitEvent(): MockAgentSubmitEvent {
+  let captured: Promise<unknown> | undefined;
+  const event: AgentSubmitEventLike = {
+    agentInvoked: true,
+    respondWith(promise: Promise<unknown>) {
+      captured = promise;
+    },
+  };
+  return {
+    event,
+    waitForResponse: () => {
+      if (!captured) {
+        return Promise.reject(
+          new Error('createMockAgentSubmitEvent: respondWith was never called'),
+        );
+      }
+      return captured;
+    },
+  };
 }

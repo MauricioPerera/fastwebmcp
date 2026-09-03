@@ -4,6 +4,8 @@ import { z } from 'zod';
 import {
   registerTool,
   createWebMcpMock,
+  withMockDocument,
+  createMockAgentSubmitEvent,
   defineDeclarativeTool,
   respondToAgentSubmit,
   type DeclarativeFormElementLike,
@@ -232,4 +234,68 @@ test('DESREGISTRO: options.signal abort desregistra la tool del mock', async () 
   assert.equal(mock.hasTool('abortable_tool'), false);
   assert.equal(mock.getTool('abortable_tool'), undefined);
 });
+
+test('PARIDAD DECLARATIVA: name charset pattern [A-Za-z0-9_.-] es validado estrictamente', () => {
+  const form = createMockForm(['q']);
+
+  // Nombres con espacios o caracteres ilegales deben lanzar antes de tocar el form
+  assert.throws(
+    () =>
+      defineDeclarativeTool(form as unknown as DeclarativeFormElementLike, {
+        name: 'invalid tool name',
+        description: 'valid desc',
+      }),
+    /name must be 1-128 characters/
+  );
+
+  assert.throws(
+    () =>
+      defineDeclarativeTool(form as unknown as DeclarativeFormElementLike, {
+        name: 'invalid@name!',
+        description: 'valid desc',
+      }),
+    /name must be 1-128 characters/
+  );
+
+  // El form no debe haber sido tocado
+  assert.equal(form.attributes.size, 0);
+});
+
+test('ERGONOMIA: withMockDocument aisla globalThis.document sin fugas', async () => {
+  const mock = createWebMcpMock();
+  const priorDoc = globalThis.document;
+
+  const res = withMockDocument(mock, () => {
+    assert.equal(globalThis.document, mock.document);
+    registerTool({
+      name: 'isolated_tool',
+      description: 'Herramienta en entorno aislado.',
+      inputSchema: z.object({}),
+      execute: async () => 'from-isolated',
+    });
+    return mock.hasTool('isolated_tool');
+  });
+
+  assert.equal(res, true);
+  // Al salir de withMockDocument, globalThis.document debe estar restaurado
+  assert.equal(globalThis.document, priorDoc);
+  assert.equal(await mock.invokeTool('isolated_tool', {}), 'from-isolated');
+});
+
+test('ERGONOMIA: createMockAgentSubmitEvent facilita pruebas de formularios declarativos', async () => {
+  const { event, waitForResponse } = createMockAgentSubmitEvent();
+
+  const handled = respondToAgentSubmit(event, () => ({
+    processed: true,
+    timestamp: 12345,
+  }));
+
+  assert.equal(handled, true);
+  const response = await waitForResponse();
+  assert.deepEqual(response, {
+    processed: true,
+    timestamp: 12345,
+  });
+});
+
 

@@ -15,6 +15,21 @@ export interface DeclarativeFormElementLike {
   elements: Iterable<{ name?: string | null; setAttribute(name: string, value: string): void }>;
 }
 
+// Same charset/length rule and Chrome budgets as the imperative defineTool()
+// (define-tool.ts): the name pattern is spec-enforced (thrown), the budgets are
+// Chrome's recommendations (warned, never thrown).
+const NAME_PATTERN = /^[A-Za-z0-9_.-]{1,128}$/;
+const NAME_BUDGET = 30;
+const DESCRIPTION_BUDGET = 500;
+
+function warnIfOverBudget(label: string, value: string, limit: number): void {
+  if (value.length > limit) {
+    console.warn(
+      `fastwebmcp: ${label} is ${value.length} characters; Chrome recommends <=${limit} for reliable agent results.`,
+    );
+  }
+}
+
 export function defineDeclarativeTool(
   form: DeclarativeFormElementLike,
   spec: DeclarativeToolSpec,
@@ -22,9 +37,15 @@ export function defineDeclarativeTool(
   if (typeof spec.name !== 'string' || spec.name.trim() === '') {
     throw new Error('defineDeclarativeTool: name must be a non-empty string');
   }
+  if (!NAME_PATTERN.test(spec.name)) {
+    throw new Error('defineDeclarativeTool: name must be 1-128 characters of letters, numbers, "_", "-", or "."');
+  }
   if (typeof spec.description !== 'string' || spec.description.trim() === '') {
     throw new Error('defineDeclarativeTool: description must be a non-empty string');
   }
+
+  warnIfOverBudget('tool name', spec.name, NAME_BUDGET);
+  warnIfOverBudget('tool description', spec.description, DESCRIPTION_BUDGET);
 
   // Atomic validation: resolve every field's element BEFORE mutating any
   // attribute, so a missing control leaves the form completely untouched.
