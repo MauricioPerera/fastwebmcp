@@ -479,7 +479,7 @@
         <a href="#architecture" data-i18n="nav.how">How it works</a>
         <a href="#status" data-i18n="nav.status">Status</a>
         <a href="#mcpwasm">mcpwasm</a>
-        <a href="lsfa.html">LSFA</a>
+        <a href="#lsfa">LSFA</a>
         <a href="docs.html" data-i18n="nav.docs">Docs</a>
         <a href="https://github.com/MauricioPerera/fastwebmcp">GitHub</a>
       </nav>
@@ -511,6 +511,7 @@
       </p>
       <div class="hero-actions">
         <span class="install-chip"><span class="p">$</span> npm install fastwebmcp</span>
+        <span class="install-chip">v0.5.0 &middot; latest</span>
         <a class="btn-ghost" href="https://www.npmjs.com/package/fastwebmcp">npm &#8599;</a>
         <a class="btn-ghost" href="https://github.com/MauricioPerera/fastwebmcp" data-i18n="hero.source">Source &#8599;</a>
       </div>
@@ -634,6 +635,32 @@ form.addEventListener(<span class="str">'submit'</span>, (e) =&gt; {
 });</pre>
         </div>
       </div>
+    </div>
+  </div>
+</section>
+
+<section id="lsfa">
+  <div class="shell">
+    <p class="eyebrow" data-i18n="lsfa.eyebrow">New in v0.5.0</p>
+    <h2 data-i18n="lsfa.h2">Let the agent request the action. Keep secrets and authority local.</h2>
+    <p class="lede prose" data-i18n="lsfa.lede">
+      The optional <code>fastwebmcp/lsfa</code> module connects an Imperative WebMCP tool
+      to a trusted LSFA broker. The agent sees only non-sensitive intent; the broker owns
+      secure capture, policy, confirmation, expiry, single-use binding, and execution.
+    </p>
+    <div class="two-col">
+      <div>
+        <span class="panel-label good" data-i18n="lsfa.agent_label">Agent boundary</span>
+        <p class="panel-note" data-i18n="lsfa.agent_p">Typed recipient, subject, or operation intent. Schemas containing passwords, credentials, tokens, PIN, OTP, or TOTP are rejected.</p>
+      </div>
+      <div>
+        <span class="panel-label bad" data-i18n="lsfa.broker_label">Trusted broker boundary</span>
+        <p class="panel-note" data-i18n="lsfa.broker_p">Risk, sensitive fields, presentation, human confirmation, execution, and a sanitized LSFA 0.2 result remain local.</p>
+      </div>
+    </div>
+    <div class="hero-actions" style="margin-top:1.75rem;">
+      <a class="btn-ghost" href="lsfa.html" data-i18n="lsfa.cta">Read the LSFA integration guide &#8594;</a>
+      <a class="btn-ghost" href="docs.html#defineLsfaTool" data-i18n="lsfa.api">API reference &#8594;</a>
     </div>
   </div>
 </section>
@@ -856,6 +883,15 @@ mock.reset(); <span class="com">// clean up for the next test</span></pre>
       'apis.lede': 'WebMCP ships two ways to expose a tool. fastwebmcp gives both the same validate-then-run discipline.',
       'apis.imperative': 'Imperative',
       'apis.declarative': 'Declarative',
+      'lsfa.eyebrow': 'New in v0.5.0',
+      'lsfa.h2': 'Let the agent request the action. Keep secrets and authority local.',
+      'lsfa.lede': 'The optional <code>fastwebmcp/lsfa</code> module connects an Imperative WebMCP tool to a trusted LSFA broker. The agent sees only non-sensitive intent; the broker owns secure capture, policy, confirmation, expiry, single-use binding, and execution.',
+      'lsfa.agent_label': 'Agent boundary',
+      'lsfa.agent_p': 'Typed recipient, subject, or operation intent. Schemas containing passwords, credentials, tokens, PIN, OTP, or TOTP are rejected.',
+      'lsfa.broker_label': 'Trusted broker boundary',
+      'lsfa.broker_p': 'Risk, sensitive fields, presentation, human confirmation, execution, and a sanitized LSFA 0.2 result remain local.',
+      'lsfa.cta': 'Read the LSFA integration guide &#8594;',
+      'lsfa.api': 'API reference &#8594;',
       'architecture.eyebrow': 'Mechanism',
       'architecture.h2': 'One call, two outcomes &mdash; the page never breaks either way.',
       'architecture.lede': 'Every registration path runs through the same check. If the browser can hear it, the agent gets a validated tool. If it can\'t, your page just renders &mdash; a warning in the console, nothing more.',
@@ -917,6 +953,15 @@ mock.reset(); <span class="com">// clean up for the next test</span></pre>
       'apis.lede': 'WebMCP trae dos formas de exponer una tool. fastwebmcp le da a ambas la misma disciplina de validar-antes-de-ejecutar.',
       'apis.imperative': 'Imperativa',
       'apis.declarative': 'Declarativa',
+      'lsfa.eyebrow': 'Nuevo en v0.5.0',
+      'lsfa.h2': 'El agente solicita la acción. Los secretos y la autoridad permanecen locales.',
+      'lsfa.lede': 'El módulo opcional <code>fastwebmcp/lsfa</code> conecta una tool WebMCP imperativa con un broker LSFA confiable. El agente solo ve intención no sensible; el broker controla captura segura, política, confirmación, expiración, binding de uso único y ejecución.',
+      'lsfa.agent_label': 'Frontera del agente',
+      'lsfa.agent_p': 'Destinatario, asunto o intención tipados. Se rechazan schemas con contraseñas, credenciales, tokens, PIN, OTP o TOTP.',
+      'lsfa.broker_label': 'Frontera del broker confiable',
+      'lsfa.broker_p': 'Riesgo, campos sensibles, presentación, confirmación humana, ejecución y resultado LSFA 0.2 sanitizado permanecen locales.',
+      'lsfa.cta': 'Leer la guía de integración LSFA &#8594;',
+      'lsfa.api': 'Referencia API &#8594;',
       'architecture.eyebrow': 'Mecanismo',
       'architecture.h2': 'Un llamado, dos resultados &mdash; la página nunca se rompe.',
       'architecture.lede': 'Todo camino de registro pasa por el mismo chequeo. Si el navegador puede escucharlo, el agente recibe una tool validada. Si no puede, tu página simplemente se renderiza &mdash; una advertencia en la consola, nada más.',
@@ -978,6 +1023,15 @@ mock.reset(); <span class="com">// clean up for the next test</span></pre>
       'apis.lede': 'O WebMCP traz duas formas de expor uma tool. O fastwebmcp dá às duas a mesma disciplina de validar-antes-de-executar.',
       'apis.imperative': 'Imperativa',
       'apis.declarative': 'Declarativa',
+      'lsfa.eyebrow': 'Novo na v0.5.0',
+      'lsfa.h2': 'O agente solicita a ação. Segredos e autoridade permanecem locais.',
+      'lsfa.lede': 'O módulo opcional <code>fastwebmcp/lsfa</code> conecta uma tool WebMCP imperativa a um broker LSFA confiável. O agente vê apenas intenção não sensível; o broker controla captura segura, política, confirmação, expiração, binding de uso único e execução.',
+      'lsfa.agent_label': 'Limite do agente',
+      'lsfa.agent_p': 'Destinatário, assunto ou intenção tipados. Schemas com senhas, credenciais, tokens, PIN, OTP ou TOTP são rejeitados.',
+      'lsfa.broker_label': 'Limite do broker confiável',
+      'lsfa.broker_p': 'Risco, campos sensíveis, apresentação, confirmação humana, execução e resultado LSFA 0.2 sanitizado permanecem locais.',
+      'lsfa.cta': 'Ler o guia de integração LSFA &#8594;',
+      'lsfa.api': 'Referência da API &#8594;',
       'architecture.eyebrow': 'Mecanismo',
       'architecture.h2': 'Uma chamada, dois resultados &mdash; a página nunca quebra.',
       'architecture.lede': 'Todo caminho de registro passa pela mesma verificação. Se o navegador consegue ouvir, o agente recebe uma tool validada. Se não consegue, sua página simplesmente renderiza &mdash; um aviso no console, nada mais.',
