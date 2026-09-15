@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>fastwebmcp — LSFA integration simulation</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 46rem; margin: 2rem auto; padding: 0 1rem; color: #17201d; background: #f7f8f5; }
+    .notice { padding: 1rem; border: 2px solid #8a4b08; border-radius: .5rem; background: #fff3df; color: #4b2905; }
+    .flow { display: grid; gap: .5rem; margin: 1.5rem 0; }
+    .step { padding: .8rem 1rem; border-left: .3rem solid #1f5a5b; background: #e5efec; }
+    button { padding: .65rem 1rem; border: 0; border-radius: .35rem; background: #1f5a5b; color: white; cursor: pointer; }
+    pre { padding: 1rem; overflow: auto; background: #16211f; color: #eaf3ef; border-radius: .4rem; }
+  </style>
+</head>
+<body>
+  <h1>LSFA integration simulation</h1>
+  <p class="notice"><strong>Simulation only.</strong> This page uses the test broker. It does not capture credentials, approve an operation, send email, or provide LSFA security guarantees.</p>
+  <p id="webmcp-status">Checking WebMCP support…</p>
+  <div class="flow" aria-label="Authority flow">
+    <div class="step">1. The agent supplies only non-sensitive intent.</div>
+    <div class="step">2. FastWebMCP delegates to an injected trusted broker.</div>
+    <div class="step">3. A real broker owns secure capture, confirmation and execution.</div>
+    <div class="step">4. The agent receives only a sanitized status summary.</div>
+  </div>
+  <button id="show-envelope" type="button">Show safe demo envelope</button>
+  <pre id="simulation-output" aria-live="polite">No simulated request shown yet.</pre>
+  <script type="module" src="../dist/lsfa-demo.js"></script>
+</body>
+</html>

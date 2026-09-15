@@ -20,6 +20,7 @@ Core reusable (`fastwebmcp`, paquete npm) + dos pieles que lo consumen:
 - Harness que invoca y verifica tools sin necesitar un navegador real.
 - Demos ejecutables, verificados contra el panel WebMCP de Chrome DevTools.
 - Exportar el schema de un `DefinedTool` (name/description/inputSchema, ya derivados de Zod) como fuente de skill para `mcpwasm` (github.com/MauricioPerera/mcpwasm) — sin intentar portar el `execute`, imposible entre DOM y el sandbox QuickJS-wasm sin DOM de mcpwasm (verificado contra su código real, no adivinado). No reimplementa el CLI oficial de mcpwasm.
+- Integracion opcional con LSFA 0.2 + Presentation 0.3 mediante un broker inyectado: WebMCP comunica intencion no sensible; el broker confiable conserva captura, politica, confirmacion, binding, consumo unico y ejecucion. FastWebMCP valida la frontera y el resultado, pero no implementa LSFA ni transporte.
 
 ## Por qué es un caso válido / motivación real
 
@@ -30,4 +31,5 @@ WebMCP solo tiene origin trial (Chrome 149); los ejemplos oficiales usan `docume
 - No es un puente WebMCP↔MCP por red — no hay lado servidor.
 - No es un polyfill de `document.modelContext`: el harness mockea la API para tests, no simula el comportamiento de un agente real.
 - Sin bindings de framework (React, Vue, etc.) en esta definición.
+- Sin HTTP loopback, Native Messaging ni extension de navegador para LSFA en la primera version.
 - El nombre exacto del paquete npm, la estructura de carpetas y el diseño detallado de la API (firmas de funciones) se deciden en los task contracts, no acá.

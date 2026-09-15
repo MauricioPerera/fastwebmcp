@@ -113,6 +113,43 @@ safely with `try...finally`, and `hasTool(name)`, `getTool(name)` and `reset()`
 make it easy to assert tool registrations and isolate tests in suites like Jest, Vitest,
 or `node:test`.
 
+## Optional LSFA integration
+
+Use `fastwebmcp/lsfa` when a WebMCP tool needs sensitive local capture or explicit human
+confirmation. The agent-facing schema must contain only non-sensitive intent. A trusted
+broker supplied by your application owns LSFA policy, risk, secure fields, presentation,
+confirmation, expiry, binding, single-use consumption and the side effect itself.
+
+```ts
+import { z } from 'zod';
+import { registerLsfaTool, type LsfaBroker } from 'fastwebmcp/lsfa';
+
+declare const trustedBroker: LsfaBroker; // your LSFA host adapter, not FastWebMCP
+
+registerLsfaTool({
+  name: 'send_email_securely',
+  description: 'Ask the trusted local broker to confirm and send an email.',
+  inputSchema: z.object({ recipient: z.string().email(), subject: z.string() }),
+  intent: {
+    operation: 'send_email',
+    purpose: 'Send only after local confirmation.',
+    presentation: { profile: 'confirmation', locale: 'en-US' },
+  },
+  broker: trustedBroker,
+}, { exposedTo: ['https://trusted-agent.example'] });
+```
+
+Schemas containing password, secret, token, credentials, API keys, PIN, OTP or TOTP
+fields are rejected recursively. The broker result is also strict and sanitized; captured
+values never return through WebMCP. This route is imperative-only, so it never enables
+`toolautosubmit`. Import `createLsfaBrokerMock` from `fastwebmcp/lsfa/testing` only in
+tests or demos: it records calls and returns explicitly queued results, but performs no
+capture, authorization or execution and provides no production security guarantees.
+
+The included [`LSFA demo`](examples/ux-page/lsfa-demo.html) is prominently marked as a
+simulation. A real broker transport (HTTP loopback, Native Messaging or extension) is
+intentionally outside this first contract.
+
 ## Framework Integration (React, Next.js, Vue)
 
 WebMCP tools in single-page applications should register when components mount and
@@ -195,7 +232,7 @@ npx http-server .   # or any static file server
 
 `supportsWebMcp()` · `defineTool(spec)` · `registerTool(spec, options?)` ·
 `createWebMcpMock()` · `defineDeclarativeTool(form, spec)` · `respondToAgentSubmit(event, handler)` ·
-`toMcpwasmSkillSource(tool, options?)`
+`toMcpwasmSkillSource(tool, options?)` · `defineLsfaTool(spec)` · `registerLsfaTool(spec, options?)`
 
 ## Changelog
 

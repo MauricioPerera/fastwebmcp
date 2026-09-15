@@ -4,6 +4,20 @@ All notable changes to the KDD Template are documented here.
 
 ## Unreleased
 
+**Contract 52 — integracion opcional FastWebMCP + LSFA** ([C52-REPORT](docs/reports/CONTRACT-52-REPORT.md))
+
+Nuevo modulo publico `fastwebmcp/lsfa`: `defineLsfaTool` y `registerLsfaTool` delegan
+intencion no sensible a un `LsfaBroker` confiable inyectado por la aplicacion. El schema
+WebMCP rechaza recursivamente passwords, secretos, tokens, credenciales, API keys, PIN,
+OTP y TOTP; la respuesta acepta solo los seis estados LSFA y un resumen estricto sin
+valores capturados. Presentation 0.3 es una sugerencia estructurada y la autoridad sobre
+politica, riesgo, campos, confirmacion, expiracion, binding, consumo unico y ejecucion
+sigue exclusivamente en el broker. Incluye `fastwebmcp/lsfa/testing`, una simulacion que
+nunca inventa aprobacion, demo claramente etiquetada y pagina tecnica separada. La prueba
+WebMCP real descubrio y corrigio que el navegador puede omitir `context`; el adaptador
+crea un `AbortSignal` fresco en ese caso. HTTP loopback, Native Messaging y extension
+real quedan deliberadamente fuera de esta version.
+
 **Contract 51 — sideEffects: false y requisito de Node para el dev local** ([C51-REPORT](docs/reports/CONTRACT-51-REPORT.md))
 
 Ronda 5 de auditoria ("seguimos con algo mas de fastwebmcp"), esta vez con dos chequeos

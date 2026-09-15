@@ -18,6 +18,7 @@ Bienvenido a la base de conocimiento del proyecto. El formato de los nodos está
 - [Patrón de estructura para paneles admin](./patron-panel-admin.md) — convención de sidebar por entidad, listados sin ID crudo y rutas separadas para auth/recuperación/verificación, contra la tendencia del LLM a apilar todo en una vista. Sin gate propio (no es un dominio de Capa 3): es referencia a aplicar y verificar a mano.
 - [Diagram contract](./diagram-contract-spec.md) — convención para referenciar diagramas Mermaid verificables desde un concept doc OKF; formato del `.diagram-contract.json`; alcance (solo flowchart) y relación con el proyecto hermano `mermaid-gate`.
 - [Mermaid como DSL: tradeoffs](./mermaid-dsl-tradeoffs.md) — por qué Mermaid generado por IA es mal fit como DSL de una plataforma de automatización (sintaxis frágil, sin semántica nativa, sin round-trip), y por qué esas mismas propiedades invertidas son justo las tres que KDD exige a todo artefacto (diffable, escribible por agente sin GUI, verificable por máquina).
+- [Integracion opcional con LSFA](./lsfa-integration.md) — frontera de autoridad entre WebMCP, FastWebMCP y un broker LSFA confiable.
 
 ## Estructura
 - [Contratos de Desarrollo](./contracts/)
@@ -28,6 +29,8 @@ Bienvenido a la base de conocimiento del proyecto. El formato de los nodos está
   - [Generador de anotaciones WebMCP Declarativas sobre un form](./contracts/define-declarative-tool.md)
   - [Responder a un submit disparado por un agente WebMCP Declarativo](./contracts/respond-to-agent-submit.md)
   - [Exportar un DefinedTool como fuente de skill mcpwasm](./contracts/to-mcpwasm-skill.md)
+  - [Adaptador imperativo WebMCP para un broker LSFA](./contracts/lsfa-tool.md)
+  - [Broker LSFA simulado para pruebas y demos](./contracts/lsfa-testing.md)
   - [Motor de reglas declarativo (rule contract)](./contracts/validate-rules.md)
   - [Gate determinista de rule contracts](./contracts/rules-gate.md)
   - [Gate de skills de agente](./contracts/skills-gate.md)
