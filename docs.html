@@ -688,7 +688,7 @@ respondToAgentSubmit(event, () =&gt; ({ status: <span class="str">'processed'</s
         <div class="code-panel"><pre><span class="kw">const</span> tool = defineLsfaTool({
   name: <span class="str">'send_email_securely'</span>,
   inputSchema: z.object({ recipient: z.string().email(), subject: z.string() }),
-  intent: { operation: <span class="str">'send_email'</span>, purpose: <span class="str">'Send after local confirmation.'</span> },
+  intent: { operation: <span class="str">'send_email'</span>, purpose: <span class="str">'Send after local confirmation.'</span>, presentation: { mode: <span class="str">'form'</span>, profile: <span class="str">'confirmation'</span> } },
   broker: trustedBroker,
 });</pre></div>
         <p><strong>Security boundary:</strong> passwords, secrets, tokens, credentials, API keys, PIN, OTP and TOTP must be captured by LSFA, never supplied in WebMCP arguments. Presentation is a hint; broker policy remains authoritative.</p>
