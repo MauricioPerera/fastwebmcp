@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>fastwebmcp + LSFA — integración segura</title>
+<style>
+  :root { --ink:#14181a; --soft:#3a4442; --paper:#f3f4f1; --surface:#e7e9e2; --line:#cfd3c9; --accent:#d94f26; --teal:#1f5a5b; }
+  * { box-sizing:border-box; } body { margin:0; color:var(--ink); background:var(--paper); font:16px/1.65 system-ui,-apple-system,"Segoe UI",sans-serif; }
+  header,main,footer { width:min(1100px,calc(100% - 2rem)); margin:auto; } header { display:flex; justify-content:space-between; align-items:center; padding:1.2rem 0; border-bottom:1px solid var(--line); }
+  a { color:var(--teal); } nav a { margin-left:1rem; text-decoration:none; } .hero { padding:5rem 0 3rem; max-width:820px; }
+  .eyebrow { color:var(--accent); font-weight:700; text-transform:uppercase; letter-spacing:.08em; } h1 { font:600 clamp(2.5rem,7vw,5.5rem)/.95 Georgia,serif; margin:.6rem 0 1.4rem; }
+  h2 { font:600 2rem/1.15 Georgia,serif; margin-top:3rem; } .lede { font-size:1.25rem; color:var(--soft); }
+  .notice { border:2px solid #8a4b08; background:#fff3df; color:#4b2905; padding:1rem 1.2rem; border-radius:.5rem; }
+  .flow { display:grid; grid-template-columns:repeat(4,1fr); gap:.8rem; margin:2rem 0; } .card { background:var(--surface); border:1px solid var(--line); padding:1rem; border-radius:.5rem; }
+  .card strong { display:block; color:var(--teal); margin-bottom:.4rem; } pre { overflow:auto; padding:1.2rem; color:#edf6f2; background:#16211f; border-radius:.5rem; }
+  code { font-family:"SFMono-Regular",Consolas,monospace; } table { width:100%; border-collapse:collapse; } th,td { text-align:left; vertical-align:top; padding:.75rem; border-bottom:1px solid var(--line); }
+  footer { margin-top:4rem; padding:2rem 0 3rem; border-top:1px solid var(--line); color:var(--soft); } @media(max-width:760px){.flow{grid-template-columns:1fr}nav{display:none}.hero{padding-top:3rem}}
+</style>
+</head>
+<body>
+<header><a href="index.html"><strong>fastwebmcp</strong></a><nav><a href="docs.html">API</a><a href="https://github.com/MauricioPerera/fastwebmcp">GitHub</a><a href="https://www.npmjs.com/package/fastwebmcp">npm</a></nav></header>
+<main>
+  <section class="hero"><p class="eyebrow">Integración opcional · LSFA 0.2 + Presentation 0.3</p><h1>El agente pide.<br>El broker decide.</h1><p class="lede">FastWebMCP conecta una tool del navegador con un broker LSFA confiable sin mostrar credenciales, PIN, TOTP ni otros secretos al agente.</p></section>
+  <p class="notice"><strong>Frontera importante:</strong> FastWebMCP no implementa LSFA, no captura secretos y no autoriza operaciones. Valida y transporta intención no sensible hacia el broker que inyecta la aplicación.</p>
+  <section aria-labelledby="flow-title"><h2 id="flow-title">Flujo de autoridad</h2><div class="flow">
+    <div class="card"><strong>1 · Agente</strong>Entrega destinatario, asunto u otra intención no sensible.</div><div class="card"><strong>2 · FastWebMCP</strong>Valida el schema y delega por la API imperativa.</div>
+    <div class="card"><strong>3 · Broker LSFA</strong>Aplica política, captura, riesgo, confirmación, expiración y ejecución.</div><div class="card"><strong>4 · Resultado</strong>Devuelve solo estado y comprobaciones sanitizadas, nunca valores capturados.</div>
+  </div></section>
+  <section><h2>Uso mínimo</h2><pre><code>import { z } from 'zod';
+import { registerLsfaTool } from 'fastwebmcp/lsfa';
+
+registerLsfaTool({
+  name: 'send_email_securely',
+  description: 'Confirmar y enviar un correo.',
+  inputSchema: z.object({ recipient: z.string().email(), subject: z.string().min(1) }),
+  intent: {
+    operation: 'send_email',
+    purpose: 'Enviar solo después de confirmación local.',
+    presentation: { profile: 'confirmation', locale: 'es-MX' },
+  },
+  broker: trustedBroker,
+}, { exposedTo: ['https://agente-confiable.example'] });</code></pre><p><code>trustedBroker</code> es un adaptador del host LSFA creado por tu aplicación. No viene incluido porque el transporte y la política pertenecen al entorno confiable.</p></section>
+  <section><h2>Qué garantiza cada capa</h2><table><thead><tr><th>Capa</th><th>Responsabilidad</th></tr></thead><tbody>
+    <tr><td>WebMCP</td><td>Descubrir e invocar la tool con argumentos no sensibles.</td></tr><tr><td>FastWebMCP</td><td>Validar input, rechazar schemas secretos, preservar abort/origin/exposedTo y sanitizar resultados.</td></tr>
+    <tr><td>Broker LSFA</td><td>Política, riesgo, campos, UI, confirmación, binding, expiración, consumo único y side effect.</td></tr></tbody></table></section>
+  <section><h2>Pruebas y límites</h2><p><code>fastwebmcp/lsfa/testing</code> incluye un broker simulado determinista. Solo registra solicitudes y devuelve resultados configurados explícitamente: no es autorización, no ejecuta acciones y no aporta garantías de producción.</p><p>La primera versión es transport-agnostic. HTTP loopback, Native Messaging y una extensión real quedan fuera hasta estabilizar el contrato público. Consulta las <a href="docs.html#defineLsfaTool">firmas completas en la referencia técnica</a>.</p></section>
+</main>
+<footer>fastwebmcp · MIT · <a href="https://github.com/MauricioPerera/fastwebmcp">código fuente</a></footer>
+</body>
+</html>

@@ -361,7 +361,7 @@
     <p class="eyebrow" data-i18n="docs.eyebrow">API Reference</p>
     <h1 data-i18n="docs.h1">Every export, in detail.</h1>
     <p data-i18n="docs.lede">
-      Nine functions, all of it. Signatures, parameters, return values, what throws and
+      Eleven functions, all of it. Signatures, parameters, return values, what throws and
       when, and a real example for each &mdash; several of them the exact code verified
       against a real browser and the real mcpwasm sandbox.
     </p>
@@ -382,6 +382,10 @@
       <a href="#createMockAgentSubmitEvent">createMockAgentSubmitEvent()</a>
       <span class="group-label" data-i18n="docs.group_mcpwasm">mcpwasm</span>
       <a href="#toMcpwasmSkillSource">toMcpwasmSkillSource()</a>
+      <span class="group-label">LSFA (optional)</span>
+      <a href="#defineLsfaTool">defineLsfaTool()</a>
+      <a href="#registerLsfaTool">registerLsfaTool()</a>
+      <a href="lsfa.html">Architecture &amp; security</a>
     </nav>
 
     <main>
@@ -677,6 +681,26 @@ respondToAgentSubmit(event, () =&gt; ({ status: <span class="str">'processed'</s
         </div>
       </section>
 
+      <section class="fn-section" id="defineLsfaTool">
+        <h2>defineLsfaTool(spec)</h2>
+        <div class="fn-signature">function defineLsfaTool&lt;TSchema extends ZodType&gt;(spec: LsfaToolSpec&lt;TSchema&gt;): DefinedTool</div>
+        <p class="desc">Defines an imperative WebMCP tool that sends only validated, non-sensitive agent input to an injected trusted LSFA broker. It rejects secret-bearing schemas and validates the broker's sanitized result.</p>
+        <div class="code-panel"><pre><span class="kw">const</span> tool = defineLsfaTool({
+  name: <span class="str">'send_email_securely'</span>,
+  inputSchema: z.object({ recipient: z.string().email(), subject: z.string() }),
+  intent: { operation: <span class="str">'send_email'</span>, purpose: <span class="str">'Send after local confirmation.'</span> },
+  broker: trustedBroker,
+});</pre></div>
+        <p><strong>Security boundary:</strong> passwords, secrets, tokens, credentials, API keys, PIN, OTP and TOTP must be captured by LSFA, never supplied in WebMCP arguments. Presentation is a hint; broker policy remains authoritative.</p>
+      </section>
+
+      <section class="fn-section" id="registerLsfaTool">
+        <h2>registerLsfaTool(spec, options?)</h2>
+        <div class="fn-signature">function registerLsfaTool(spec: LsfaToolSpec, options?: RegisterToolOptions): boolean</div>
+        <p class="desc">Defines and registers the LSFA-backed imperative tool. It preserves <code>signal</code>, <code>exposedTo</code>, and the safe no-WebMCP fallback. It never uses Declarative WebMCP or <code>toolautosubmit</code>.</p>
+        <p>For tests and demos only, import <code>createLsfaBrokerMock</code> from <code>fastwebmcp/lsfa/testing</code>. The mock does not capture, authorize or execute anything.</p>
+      </section>
+
       <section class="fn-section" id="toMcpwasmSkillSource">
         <h2>toMcpwasmSkillSource(tool, options?)</h2>
         <div class="fn-signature">function toMcpwasmSkillSource(tool: DefinedTool, options?: McpwasmSkillOptions): string</div>
@@ -737,7 +761,7 @@ toMcpwasmSkillSource(tool, {
       'theme.toggle': 'Toggle color theme',
       'docs.eyebrow': 'API Reference',
       'docs.h1': 'Every export, in detail.',
-      'docs.lede': 'Nine functions, all of it. Signatures, parameters, return values, what throws and when, and a real example for each &mdash; several of them the exact code verified against a real browser and the real mcpwasm sandbox.',
+      'docs.lede': 'Eleven functions, all of it. Signatures, parameters, return values, what throws and when, and a real example for each &mdash; several of them the exact code verified against a real browser and the real mcpwasm sandbox.',
       'docs.group_imperative': 'Imperative',
       'docs.group_declarative': 'Declarative',
       'docs.group_testing': 'Testing',
@@ -814,7 +838,7 @@ toMcpwasmSkillSource(tool, {
       'theme.toggle': 'Cambiar tema de color',
       'docs.eyebrow': 'Referencia de API',
       'docs.h1': 'Cada export, en detalle.',
-      'docs.lede': 'Nueve funciones, todo. Firmas, parámetros, valores de retorno, qué lanza y cuándo, y un ejemplo real para cada una &mdash; varios son el código exacto verificado contra un navegador real y el sandbox real de mcpwasm.',
+      'docs.lede': 'Once funciones, todo. Firmas, parámetros, valores de retorno, qué lanza y cuándo, y un ejemplo real para cada una &mdash; varios son el código exacto verificado contra un navegador real y el sandbox real de mcpwasm.',
       'docs.group_imperative': 'Imperativa',
       'docs.group_declarative': 'Declarativa',
       'docs.group_testing': 'Testing',
@@ -891,7 +915,7 @@ toMcpwasmSkillSource(tool, {
       'theme.toggle': 'Alternar tema de cor',
       'docs.eyebrow': 'Referência de API',
       'docs.h1': 'Cada export, em detalhe.',
-      'docs.lede': 'Nove funções, tudo. Assinaturas, parâmetros, valores de retorno, o que lança e quando, e um exemplo real para cada uma &mdash; vários são o código exato verificado contra um navegador real e o sandbox real do mcpwasm.',
+      'docs.lede': 'Onze funções, tudo. Assinaturas, parâmetros, valores de retorno, o que lança e quando, e um exemplo real para cada uma &mdash; vários são o código exato verificado contra um navegador real e o sandbox real do mcpwasm.',
       'docs.group_imperative': 'Imperativa',
       'docs.group_declarative': 'Declarativa',
       'docs.group_testing': 'Testes',
