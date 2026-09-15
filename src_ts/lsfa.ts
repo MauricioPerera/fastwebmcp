@@ -4,23 +4,25 @@ import { registerTool, type RegisterToolOptions } from './register-tool.ts';
 
 export const LSFA_STATUSES = ['accepted', 'declined', 'cancelled', 'invalid', 'failed', 'expired'] as const;
 export type LsfaStatus = (typeof LSFA_STATUSES)[number];
-export type LsfaRisk = 'low' | 'medium' | 'high' | 'critical';
+export type LsfaRisk = 'low' | 'medium' | 'high' | 'irreversible';
+export type LsfaPresentationMode = 'auto' | 'form' | 'terminal' | 'headless' | 'manual';
 
 export interface LsfaPresentationLayout {
-  sections: Array<{ id: string; title?: string; fields?: string[] }>;
+  sections: Array<{ id: string; title: string; fields: string[]; collapsed?: boolean }>;
 }
 
 export interface LsfaPresentation {
+  mode?: LsfaPresentationMode;
   profile?: string;
   layout?: LsfaPresentationLayout;
   locale?: string;
-  theme?: 'light' | 'dark' | 'system';
+  theme?: 'light' | 'dark' | 'system' | 'high_contrast';
 }
 
 export interface LsfaIntent {
   operation: string;
   purpose: string;
-  presentation?: LsfaPresentation;
+  presentation?: LsfaPresentationMode | LsfaPresentation;
 }
 
 export interface LsfaBrokerRequest<TInput = unknown> {
@@ -42,10 +44,10 @@ export interface LsfaBroker {
 export interface LsfaResult {
   status: LsfaStatus;
   operation: string;
-  request_id: string;
-  risk: LsfaRisk;
-  checks: { confirmed: boolean; bound: boolean; single_use: boolean };
-  stored_refs: Record<string, boolean>;
+  request_id?: string;
+  risk?: LsfaRisk;
+  checks?: Record<string, boolean>;
+  stored_refs?: Record<string, boolean | 'present' | 'absent'>;
   error_code?: string;
 }
 
@@ -59,17 +61,23 @@ export interface LsfaToolSpec<TSchema extends ZodType> {
   title?: string;
 }
 
-const IDENTIFIER = /^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$/;
+const OPERATION = /^[a-z][a-z0-9_]{0,63}$/;
+const REQUEST_ID = /^[A-Za-z0-9._-]{1,128}$/;
+const RESULT_KEY = /^[a-z][a-z0-9_]{0,63}$/;
+const ERROR_CODE = /^[a-z0-9_.-]{1,64}$/;
+const PROFILE = /^[a-z][a-z0-9_.-]{0,63}$/;
+const FIELD = /^[A-Za-z][A-Za-z0-9_.-]{0,63}$/;
+const SECTION = /^[a-z][a-z0-9_-]{0,63}$/;
 const SECRET_KEY = /(?:^|[_-])(password|passwd|secret|token|credential|credentials|pin|otp|totp|api[_-]?key|private[_-]?key)(?:$|[_-])/i;
 const CAMEL_SECRET_KEY = /(password|passwd|secret|token|credential|credentials|pin|otp|totp|apiKey|privateKey)/i;
 const resultSchema = z.strictObject({
   status: z.enum(LSFA_STATUSES),
-  operation: z.string().regex(IDENTIFIER),
-  request_id: z.string().regex(IDENTIFIER),
-  risk: z.enum(['low', 'medium', 'high', 'critical']),
-  checks: z.strictObject({ confirmed: z.boolean(), bound: z.boolean(), single_use: z.boolean() }),
-  stored_refs: z.record(z.string().regex(IDENTIFIER), z.boolean()),
-  error_code: z.string().regex(IDENTIFIER).optional(),
+  operation: z.string().regex(OPERATION),
+  request_id: z.string().regex(REQUEST_ID).optional(),
+  risk: z.enum(['low', 'medium', 'high', 'irreversible']).optional(),
+  checks: z.record(z.string().regex(RESULT_KEY), z.boolean()).optional(),
+  stored_refs: z.record(z.string().regex(RESULT_KEY), z.union([z.boolean(), z.enum(['present', 'absent'])])).optional(),
+  error_code: z.string().regex(ERROR_CODE).optional(),
 });
 
 function containsSecretSchema(value: unknown, key = ''): boolean {
@@ -81,24 +89,32 @@ function containsSecretSchema(value: unknown, key = ''): boolean {
 }
 
 function assertText(label: string, value: unknown): asserts value is string {
-  if (typeof value !== 'string' || !IDENTIFIER.test(value)) {
+  if (typeof value !== 'string' || !OPERATION.test(value)) {
     throw new Error(`fastwebmcp/lsfa: ${label} must be a safe identifier`);
   }
 }
 
-function validatePresentation(value: LsfaPresentation | undefined): void {
+function validatePresentation(value: LsfaPresentationMode | LsfaPresentation | undefined): void {
   if (value === undefined) return;
+  if (typeof value === 'string') {
+    if (!['auto', 'form', 'terminal', 'headless', 'manual'].includes(value)) {
+      throw new Error('fastwebmcp/lsfa: invalid presentation hint');
+    }
+    return;
+  }
   const parsed = z.strictObject({
-    profile: z.string().regex(IDENTIFIER).optional(),
+    mode: z.enum(['auto', 'form', 'terminal', 'headless', 'manual']).optional(),
+    profile: z.string().regex(PROFILE).optional(),
     layout: z.strictObject({
       sections: z.array(z.strictObject({
-        id: z.string().regex(IDENTIFIER),
-        title: z.string().min(1).max(160).optional(),
-        fields: z.array(z.string().regex(IDENTIFIER)).optional(),
-      })),
+        id: z.string().regex(SECTION),
+        title: z.string().min(1).max(160).regex(/\S/),
+        fields: z.array(z.string().regex(FIELD)).min(1).max(64).refine((fields) => new Set(fields).size === fields.length),
+        collapsed: z.boolean().optional(),
+      })).min(1).max(32),
     }).optional(),
     locale: z.string().regex(/^[A-Za-z]{2,3}(?:-[A-Za-z0-9]{2,8})*$/).optional(),
-    theme: z.enum(['light', 'dark', 'system']).optional(),
+    theme: z.enum(['light', 'dark', 'system', 'high_contrast']).optional(),
   }).safeParse(value);
   if (!parsed.success || (value.profile !== undefined && value.layout !== undefined)) {
     throw new Error('fastwebmcp/lsfa: invalid presentation hint');

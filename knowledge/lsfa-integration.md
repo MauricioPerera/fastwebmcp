@@ -15,7 +15,9 @@ y ejecucion.
 
 El adaptador usa exclusivamente la API WebMCP imperativa. Nunca crea formularios
 declarativos ni `toolautosubmit`. La extension LSFA Presentation 0.3 se transmite como una
-sugerencia estructurada y estricta; el broker vuelve a validarla y puede ignorarla.
+sugerencia estructurada; los modos, temas, limites y layout siguen el schema 0.3. Una
+referencia abreviada de perfil es solo un hint del adaptador: el broker construye y valida
+la solicitud LSFA canonica y puede ignorar la presentacion.
 
 Los secretos, credenciales, PIN, OTP y TOTP no pertenecen al `inputSchema` visible al
 agente. El resultado que vuelve al agente es un resumen estricto: estado, operacion,
@@ -24,4 +26,3 @@ de error estable. No contiene valores capturados.
 
 El primer contrato solo define una frontera transport-agnostic. HTTP loopback, Native
 Messaging y extensiones de navegador quedan fuera hasta estabilizar esta interfaz.
-

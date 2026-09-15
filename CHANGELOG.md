@@ -17,6 +17,9 @@ nunca inventa aprobacion, demo claramente etiquetada y pagina tecnica separada. 
 WebMCP real descubrio y corrigio que el navegador puede omitir `context`; el adaptador
 crea un `AbortSignal` fresco en ese caso. HTTP loopback, Native Messaging y extension
 real quedan deliberadamente fuera de esta version.
+La auditoria final se hizo contra los schemas actuales de LSFA: resultado minimo
+`status+operation`, riesgo `irreversible`, checks booleanos abiertos, referencias
+`true/false/present/absent` y limites/modos/temas exactos de Presentation 0.3.
 
 **Contract 51 — sideEffects: false y requisito de Node para el dev local** ([C51-REPORT](docs/reports/CONTRACT-51-REPORT.md))
 

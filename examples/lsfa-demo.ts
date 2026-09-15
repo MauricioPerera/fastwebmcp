@@ -25,7 +25,7 @@ const spec = {
   intent: {
     operation: 'send_email',
     purpose: 'Send an email only after trusted local confirmation.',
-    presentation: { profile: 'confirmation', locale: 'en-US', theme: 'system' as const },
+    presentation: { mode: 'form' as const, profile: 'confirmation', locale: 'en-US', theme: 'system' as const },
   },
   broker: mock.broker,
 };

@@ -23,6 +23,7 @@ export {
   registerLsfaTool,
   type LsfaStatus,
   type LsfaRisk,
+  type LsfaPresentationMode,
   type LsfaPresentationLayout,
   type LsfaPresentation,
   type LsfaIntent,

@@ -44,3 +44,12 @@ registration)”; el navegador confirmó que ya no había tools disponibles.
 - `exposedTo` y el signal de desregistro siguen pasando por `registerTool`.
 - Abort previo impide dispatch; después del dispatch no hay retry automático.
 
+## Auditoría contra la fuente LSFA
+
+Antes del cierre se clonó de nuevo `MauricioPerera/local-secure-forms` y se compararon
+directamente `schemas/result.schema.json`, `schemas/presentation.schema.json` y
+`schemas/request.schema.json`. La primera versión local tenía drift: `critical` en vez de
+`irreversible`, checks fijos, referencias solo booleanas y campos opcionales tratados como
+obligatorios. Se corrigió sin modificar los oráculos: riesgo canónico, checks booleanos
+registrados, referencias `true/false/present/absent`, resultado mínimo status+operation,
+y límites/modos/tema `high_contrast` de Presentation 0.3.

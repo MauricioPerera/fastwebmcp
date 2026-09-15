@@ -133,7 +133,7 @@ registerLsfaTool({
   intent: {
     operation: 'send_email',
     purpose: 'Send only after local confirmation.',
-    presentation: { profile: 'confirmation', locale: 'en-US' },
+    presentation: { mode: 'form', profile: 'confirmation', locale: 'en-US' },
   },
   broker: trustedBroker,
 }, { exposedTo: ['https://trusted-agent.example'] });
@@ -149,6 +149,13 @@ capture, authorization or execution and provides no production security guarante
 The included [`LSFA demo`](examples/ux-page/lsfa-demo.html) is prominently marked as a
 simulation. A real broker transport (HTTP loopback, Native Messaging or extension) is
 intentionally outside this first contract.
+
+The result shape follows LSFA's published 0.2 schema: only `status` and `operation` are
+required; `request_id`, `risk`, boolean `checks`, `stored_refs` (`true`, `false`,
+`present`, or `absent`) and `error_code` are optional. The presentation validator follows
+the 0.3 modes, themes and layout limits. A profile-only object is accepted as an adapter
+hint for convenience; the broker must add/choose the canonical mode and validate the
+complete LSFA request against its own policy before showing anything.
 
 ## Framework Integration (React, Next.js, Vue)
 
