@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Demo LSFA + FastWebMCP — frontera de confianza</title>
+<style>
+  :root { --ink:#14181a; --soft:#3a4442; --paper:#f3f4f1; --surface:#e7e9e2; --line:#cfd3c9; --accent:#d94f26; --teal:#1f5a5b; --dark:#16211f; }
+  * { box-sizing:border-box; } body { margin:0; color:var(--ink); background:var(--paper); font:16px/1.65 system-ui,-apple-system,"Segoe UI",sans-serif; }
+  header,main,footer { width:min(980px,calc(100% - 2rem)); margin:auto; } header { display:flex; justify-content:space-between; align-items:center; gap:1rem; padding:1.2rem 0; border-bottom:1px solid var(--line); }
+  a { color:var(--teal); } nav { display:flex; gap:1rem; flex-wrap:wrap; } nav a { text-decoration:none; } .hero { padding:5rem 0 2.5rem; max-width:780px; }
+  .eyebrow { color:var(--accent); font-weight:700; text-transform:uppercase; letter-spacing:.08em; } h1 { font:600 clamp(2.5rem,7vw,5.5rem)/.95 Georgia,serif; margin:.6rem 0 1.4rem; } h2 { font:600 2rem/1.15 Georgia,serif; margin:3rem 0 1rem; }
+  .lede { font-size:1.2rem; color:var(--soft); } .notice { border:2px solid #8a4b08; background:#fff3df; color:#4b2905; padding:1rem 1.2rem; border-radius:.5rem; }
+  .status { margin:1.5rem 0; padding:1rem 1.2rem; border-left:.35rem solid var(--teal); background:var(--surface); } .flow { display:grid; grid-template-columns:repeat(4,1fr); gap:.8rem; margin:2rem 0; }
+  .card { background:var(--surface); border:1px solid var(--line); padding:1rem; border-radius:.5rem; } .card strong { display:block; color:var(--teal); margin-bottom:.4rem; }
+  button { appearance:none; border:0; border-radius:.35rem; background:var(--teal); color:white; padding:.75rem 1rem; font:600 1rem system-ui,sans-serif; cursor:pointer; } button:hover { background:#174849; } button:focus-visible,a:focus-visible { outline:3px solid var(--accent); outline-offset:3px; }
+  pre { overflow:auto; padding:1.2rem; color:#edf6f2; background:var(--dark); border-radius:.5rem; } code { font-family:"SFMono-Regular",Consolas,monospace; } .boundary { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin:1.5rem 0; }
+  .boundary section { border:1px solid var(--line); padding:1rem 1.2rem; } .boundary h3 { color:var(--teal); margin:0 0 .4rem; } footer { margin-top:4rem; padding:2rem 0 3rem; border-top:1px solid var(--line); color:var(--soft); }
+  @media (prefers-reduced-motion:reduce) { * { scroll-behavior:auto; transition:none !important; } } @media(max-width:760px){.flow,.boundary{grid-template-columns:1fr}.hero{padding-top:3rem}nav{font-size:.9rem}}
+</style>
+</head>
+<body>
+<header><a href="index.html"><strong>fastwebmcp</strong></a><nav><a href="lsfa.html">Guía LSFA</a><a href="docs.html#defineLsfaTool">API</a><a href="https://github.com/MauricioPerera/fastwebmcp">GitHub</a></nav></header>
+<main>
+  <section class="hero"><p class="eyebrow">Demo pública · simulación explícita</p><h1>La intención cruza.<br>El secreto no.</h1><p class="lede">Esta página registra <code>send_email_securely</code> mediante <code>fastwebmcp/lsfa</code>. La tool acepta solo destinatario y asunto; el broker LSFA es quien debería pedir credenciales y confirmación de forma local.</p></section>
+  <p class="notice"><strong>No envía correos ni solicita credenciales.</strong> La demo usa un broker de pruebas con un resultado configurado. Sirve para inspeccionar el límite de confianza, no para autorizar una acción real.</p>
+  <p id="webmcp-status" class="status" aria-live="polite">Comprobando disponibilidad de WebMCP…</p>
+  <section aria-labelledby="flow-title"><h2 id="flow-title">Qué sucede al invocar la tool</h2><div class="flow"><div class="card"><strong>1 · Agente</strong>Solo aporta <code>recipient</code> y <code>subject</code>.</div><div class="card"><strong>2 · FastWebMCP</strong>Valida el schema y crea el sobre LSFA.</div><div class="card"><strong>3 · Broker LSFA</strong>En producción controla el formulario, secreto, riesgo y aprobación.</div><div class="card"><strong>4 · Resultado</strong>El agente recibe únicamente un estado sanitizado.</div></div></section>
+  <section><h2>Inspecciona el sobre seguro</h2><p>El botón no ejecuta una acción. Muestra el único dato que la demo entregaría al broker y confirma que no contiene una contraseña, token, PIN ni decisión de aprobación.</p><button id="show-envelope" type="button">Mostrar sobre no sensible</button><pre id="simulation-output" aria-live="polite">Aún no se mostró una solicitud simulada.</pre></section>
+  <section><h2>La frontera de responsabilidades</h2><div class="boundary"><section><h3>FastWebMCP / WebMCP</h3><p>Schema de intención, validación, origen, abort y resultado estricto.</p></section><section><h3>Broker LSFA local</h3><p>Política, captura de secretos, confirmación, expiración, consumo único y ejecución.</p></section></div><p>En un navegador compatible con WebMCP, un agente puede descubrir la tool registrada. En navegadores sin soporte, el registro se degrada con seguridad a un no-op y la página sigue funcionando para personas.</p></section>
+  <section><h2>Prueba con un agente compatible</h2><p>Pide al agente: <code>Usa send_email_securely para enviar un correo a ana@example.com con asunto “Hola”.</code> La demo responderá con un resultado simulado. Una integración real debe reemplazar el broker de pruebas por un broker LSFA confiable de la aplicación.</p><p><a href="lsfa.html">Ver el contrato y la guía de integración LSFA →</a></p></section>
+</main>
+<footer>fastwebmcp · demo de frontera LSFA · <a href="https://mauricioperera.github.io/local-secure-forms/fastwebmcp.html">documentación del protocolo LSFA</a></footer>
+<script type="module" src="js/lsfa-demo.js"></script>
+</body>
+</html>
