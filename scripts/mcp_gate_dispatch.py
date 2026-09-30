@@ -147,7 +147,7 @@ GATE_SPECS = {
     'scan_secrets': {
         'script': 'scripts/scan_secrets.py',
         'params': ['dirs'],
-        'defaults': {'dirs': ['src']},
+        'defaults': {'dirs': ['src_ts']},
     },
     'validate_attestation': {
         'script': 'scripts/validate_attestation.py',

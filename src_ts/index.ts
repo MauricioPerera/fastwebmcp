@@ -1,6 +1,6 @@
 export { supportsWebMcp } from './supports-webmcp.ts';
 export { defineTool, type ToolSpec, type DefinedTool } from './define-tool.ts';
-export { registerTool, type RegisterToolOptions } from './register-tool.ts';
+export { registerTool, registerToolAsync, type RegisterToolOptions } from './register-tool.ts';
 export {
   createWebMcpMock,
   withMockDocument,
@@ -21,6 +21,7 @@ export {
   LSFA_STATUSES,
   defineLsfaTool,
   registerLsfaTool,
+  registerLsfaToolAsync,
   type LsfaStatus,
   type LsfaRisk,
   type LsfaPresentationMode,

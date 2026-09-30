@@ -39,6 +39,15 @@ your handler runs), then calls `document.modelContext.registerTool(...)` if the 
 supports it — falling back to a `console.warn` no-op otherwise, so your page never
 breaks on an unsupported browser.
 
+For confirmed registration, use `await registerToolAsync(spec, options)`. It resolves
+to `true` only after the native registration completes, resolves to `false` when
+WebMCP is unavailable, and rejects with the original browser error (for example,
+duplicate names or denied permissions). Handle the rejection with `try`/`catch`.
+The synchronous `registerTool` remains compatible: `true` means the request was
+dispatched, and a later native rejection emits a warning. Synchronous errors still
+propagate. The browser API's registration contract is documented in the
+[WebMCP specification](https://webmachinelearning.github.io/webmcp/#dom-modelcontext-registertool).
+
 `defineTool` also validates `name` against the WebMCP spec's own charset (1-128 chars,
 `[A-Za-z0-9_.-]`), and warns — never throws — if `name`/`description` exceed the length
 Chrome's [tool security guide](https://developer.chrome.com/docs/ai/webmcp/secure-tools)
@@ -73,6 +82,11 @@ form.addEventListener('submit', (event) => {
 `toolparamdescription` attributes the [WebMCP Declarative API explainer](https://github.com/webmachinelearning/webmcp/blob/main/declarative-api-explainer.md)
 specifies. The JSON Schema the browser derives from the form's fields is not something
 this library computes or validates — that algorithm is still unspecified upstream.
+
+`autoSubmit: false` removes an existing `toolautosubmit` attribute. Omitting the
+option preserves the form's current setting. Custom form-like objects must provide
+`removeAttribute` when explicitly disabling autosubmit; otherwise validation fails
+before the form is modified. Native HTML forms already provide this method.
 
 ## Testing your own tools without a real browser
 
@@ -109,9 +123,16 @@ const response = await waitForResponse(); // { status: 'processed' }
 
 `invokeTool` runs the real `execute` your tool was registered with (Zod parsing
 included) — not a reimplementation. `withMockDocument` isolates `globalThis.document`
-safely with `try...finally`, and `hasTool(name)`, `getTool(name)` and `reset()`
+safely until the callback returns or its promise settles, and restores the original
+property descriptor even on rejection. Run async scopes in series, or nest them
+with `await`: simultaneous independent scopes share the same global document and
+cannot isolate each other. `hasTool(name)`, `getTool(name)` and `reset()`
 make it easy to assert tool registrations and isolate tests in suites like Jest, Vitest,
 or `node:test`.
+
+`reset()` also removes registration abort listeners. The mock retains its existing
+overwrite-by-name behavior; unlike the native API, it does not reject duplicate
+names. It is a handler test harness, rather than a complete browser implementation.
 
 ## Optional LSFA integration
 
@@ -140,7 +161,12 @@ registerLsfaTool({
 ```
 
 Schemas containing password, secret, token, credentials, API keys, PIN, OTP or TOTP
-fields are rejected recursively. The broker result is also strict and sanitized; captured
+name tokens are rejected recursively (snake_case, kebab-case and camelCase); ordinary
+names such as `shipping_address` and metrics such as `token_count` are allowed.
+Names are a heuristic, so the application must still keep sensitive values out of
+agent input. `registerLsfaToolAsync` provides the same confirmed registration as
+`registerToolAsync`. Both LSFA registration variants parse each invocation once.
+The broker result is also strict and sanitized; captured
 values never return through WebMCP. This route is imperative-only, so it never enables
 `toolautosubmit`. Import `createLsfaBrokerMock` from `fastwebmcp/lsfa/testing` only in
 tests or demos: it records calls and returns explicitly queued results, but performs no
@@ -226,14 +252,22 @@ scaffolding, hash-sealing, and publishing.
 
 ## Examples
 
-Two runnable demo pages, verified against a real `document.modelContext`, live in
+Runnable demo pages, verified against a real `document.modelContext`, live in
 [`examples/`](examples/):
 
 ```sh
 npm run build:examples
 npx http-server .   # or any static file server
 # open examples/ux-page/imperative-demo.html and .../declarative-demo.html
+# or examples/text-editor/ for the interactive text editor
 ```
+
+The [text editor](examples/text-editor/) exposes eight WebMCP tools to read,
+write, insert, replace, find, select, undo and redo the visible document. It saves
+the draft locally and records each tool call on screen. Edits require the last
+read revision to protect concurrent human changes. See its
+[run instructions](examples/text-editor/README.md) and
+[verification report](docs/reports/CONTRACT-54-REPORT.md).
 
 ## API surface
 

@@ -1,5 +1,8 @@
 # Knowledge Bundle (OKF)
 
+- [Correcciones del runtime auditado](./contracts/audit-runtime-fixes.md)
+- [Objetivo real del escaneo local](./contracts/audit-scan-target.md)
+
 Bienvenido a la base de conocimiento del proyecto. El formato de los nodos está especificado en [OKF-SPEC](./OKF-SPEC.md).
 
 ## Referencia
@@ -57,6 +60,7 @@ Bienvenido a la base de conocimiento del proyecto. El formato de los nodos está
   - [Exportador de contratos para el gate CCDD Nivel 2](./contracts/export-gate-contract.md)
   - [Regla de contexto presupuestado en las reglas de agentes](./contracts/agents-context-rule.md)
 - [Modelos de Datos](./data_models/)
+  - [Editor de texto WebMCP](./contracts/text-editor-demo.md)
   - [Hallazgos de seguridad (Capa 3)](./data_models/security_findings.md)
   - [Hallazgos de compliance/licencias (Capa 3)](./data_models/compliance_findings.md)
   - [Hallazgos de privacidad/PII (Capa 3)](./data_models/privacy_findings.md)

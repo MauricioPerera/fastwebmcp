@@ -1,6 +1,6 @@
 import { z, type ZodType } from 'zod';
 import { defineTool, type DefinedTool, type ToolAnnotations } from './define-tool.ts';
-import { registerTool, type RegisterToolOptions } from './register-tool.ts';
+import { registerDefinedTool, registerDefinedToolAsync, type RegisterToolOptions } from './register-tool.ts';
 
 export const LSFA_STATUSES = ['accepted', 'declined', 'cancelled', 'invalid', 'failed', 'expired'] as const;
 export type LsfaStatus = (typeof LSFA_STATUSES)[number];
@@ -68,8 +68,16 @@ const ERROR_CODE = /^[a-z0-9_.-]{1,64}$/;
 const PROFILE = /^[a-z][a-z0-9_.-]{0,63}$/;
 const FIELD = /^[A-Za-z][A-Za-z0-9_.-]{0,63}$/;
 const SECTION = /^[a-z][a-z0-9_-]{0,63}$/;
-const SECRET_KEY = /(?:^|[_-])(password|passwd|secret|token|credential|credentials|pin|otp|totp|api[_-]?key|private[_-]?key)(?:$|[_-])/i;
-const CAMEL_SECRET_KEY = /(password|passwd|secret|token|credential|credentials|pin|otp|totp|apiKey|privateKey)/i;
+const SECRET_TOKEN = /^(password|passwd|secret|token|credential|credentials|pin|otp|totp|apikey|privatekey)$/;
+
+function isSecretKey(key: string): boolean {
+  const tokens = key.replace(/([A-Z]+)([A-Z][a-z])/g, '$1_$2')
+    .replace(/([a-z0-9])([A-Z])/g, '$1_$2').toLowerCase().split(/[^a-z0-9]+/);
+  // Counts describe a metric, not a captured token or credential value.
+  if (tokens.length === 2 && tokens[1] === 'count' && /^(token|credential|credentials)$/.test(tokens[0])) return false;
+  return tokens.some(token => SECRET_TOKEN.test(token)) ||
+    tokens.some((token, index) => (token === 'api' || token === 'private') && tokens[index + 1] === 'key');
+}
 const resultSchema = z.strictObject({
   status: z.enum(LSFA_STATUSES),
   operation: z.string().regex(OPERATION),
@@ -81,7 +89,7 @@ const resultSchema = z.strictObject({
 });
 
 function containsSecretSchema(value: unknown, key = ''): boolean {
-  if ((SECRET_KEY.test(key) || CAMEL_SECRET_KEY.test(key)) && key !== '') return true;
+  if (key !== '' && isSecretKey(key)) return true;
   if (!value || typeof value !== 'object') return false;
   const record = value as Record<string, unknown>;
   if (record.format === 'password' || record.writeOnly === true || record.sensitive === true) return true;
@@ -172,12 +180,12 @@ export function registerLsfaTool<TSchema extends ZodType>(
   options?: RegisterToolOptions,
 ): boolean {
   const defined = defineLsfaTool(spec);
-  return registerTool({
-    name: defined.name,
-    description: defined.description,
-    inputSchema: spec.inputSchema,
-    ...(defined.annotations !== undefined ? { annotations: defined.annotations } : {}),
-    ...(defined.title !== undefined ? { title: defined.title } : {}),
-    execute: (input, context) => defined.execute(input, context),
-  }, options);
+  return registerDefinedTool(defined, options);
+}
+
+export async function registerLsfaToolAsync<TSchema extends ZodType>(
+  spec: LsfaToolSpec<TSchema>,
+  options?: RegisterToolOptions,
+): Promise<boolean> {
+  return registerDefinedToolAsync(defineLsfaTool(spec), options);
 }

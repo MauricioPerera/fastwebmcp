@@ -23,6 +23,10 @@ forbids: ['network', 'subprocess', 'llm', 'secret-in-agent-schema', 'toolautosub
 
 # Contract: adaptador WebMCP para LSFA
 
+Ampliado por [correcciones de auditoria](./audit-runtime-fixes.md): registro
+compartido de DefinedTool para parsear una sola vez, variante asincrona y
+deteccion de secretos por tokens del nombre.
+
 ## Intent
 
 Implementar la frontera descrita en [integracion LSFA](../lsfa-integration.md), reutilizando

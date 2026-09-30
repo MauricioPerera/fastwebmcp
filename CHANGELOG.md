@@ -4,6 +4,22 @@ All notable changes to the KDD Template are documented here.
 
 ## Unreleased
 
+**Contract 54 — editor de texto WebMCP** ([C54-REPORT](docs/reports/CONTRACT-54-REPORT.md))
+
+Ejemplo interactivo con ocho herramientas sobre el documento visible, control
+de revision, busqueda literal, seleccion UTF-16, deshacer/rehacer y guardado local.
+Incluye oraculo sellado, typecheck y bundle en build:examples; sin dependencias nuevas.
+
+**Contract 53 — correcciones de auditoria FastWebMCP** ([C53-REPORT](docs/reports/CONTRACT-53-REPORT.md))
+
+Nuevas APIs `registerToolAsync` y `registerLsfaToolAsync` esperan el registro nativo
+y propagan sus errores. Las APIs sincronas conservan su boolean como indicador de
+dispatch y reportan rechazos asincronos con warning. `autoSubmit: false` elimina el
+atributo existente; scopes de mock asincronos conservan document hasta terminar.
+Reset/reemplazo retira listeners obsoletos; LSFA parsea una sola vez y detecta
+tokens sensibles sin bloquear shipping_address. El scanner local/MCP apunta a
+src_ts como CI. Nuevos oraculos de regresion; pruebas anteriores intactas.
+
 **Contract 52 — integracion opcional FastWebMCP + LSFA** ([C52-REPORT](docs/reports/CONTRACT-52-REPORT.md))
 
 Nuevo modulo publico `fastwebmcp/lsfa`: `defineLsfaTool` y `registerLsfaTool` delegan

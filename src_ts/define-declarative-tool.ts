@@ -12,6 +12,7 @@ export interface DeclarativeToolSpec {
 
 export interface DeclarativeFormElementLike {
   setAttribute(name: string, value: string): void;
+  removeAttribute?(name: string): void;
   elements: Iterable<{ name?: string | null; setAttribute(name: string, value: string): void }>;
 }
 
@@ -58,10 +59,16 @@ export function defineDeclarativeTool(
     return { field, element };
   });
 
+  if (spec.autoSubmit === false && typeof form.removeAttribute !== 'function') {
+    throw new Error('defineDeclarativeTool: removeAttribute is required when autoSubmit is false');
+  }
+
   form.setAttribute('toolname', spec.name);
   form.setAttribute('tooldescription', spec.description);
   if (spec.autoSubmit) {
     form.setAttribute('toolautosubmit', '');
+  } else if (spec.autoSubmit === false) {
+    form.removeAttribute!('toolautosubmit');
   }
 
   for (const { field, element } of matched) {

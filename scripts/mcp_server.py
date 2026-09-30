@@ -174,7 +174,7 @@ def validate_test_commands(contracts_dir: str | None = None, root: str | None = 
 @mcp.tool()
 def scan_secrets(dirs: list[str] | None = None) -> dict:
     """Escaneo determinista de credenciales filtradas por prefijo de proveedor
-    conocido (AWS/GitHub/Slack/Google/Stripe + private keys). Default dirs: ['src']."""
+    conocido (AWS/GitHub/Slack/Google/Stripe + private keys). Default dirs: ['src_ts']."""
     return _dispatch('scan_secrets', _params(dirs=dirs), repo_root=REPO_ROOT)
 
 

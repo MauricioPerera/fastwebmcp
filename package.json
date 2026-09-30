@@ -50,7 +50,7 @@
     "typecheck": "tsc --noEmit",
     "test": "node --test tests_ts/**/*.test.ts",
     "build": "tsc -p tsconfig.build.json",
-    "build:examples": "esbuild examples/imperative-demo.ts examples/declarative-demo.ts examples/lsfa-demo.ts examples/lsfa-fallback-worker.ts --bundle --minify --format=esm --outdir=examples/dist",
+    "build:examples": "esbuild examples/imperative-demo.ts examples/declarative-demo.ts examples/lsfa-demo.ts examples/lsfa-fallback-worker.ts --bundle --minify --format=esm --outdir=examples/dist && esbuild examples/text-editor/editor.ts --bundle --minify --format=esm --outfile=examples/text-editor/dist/editor.js",
     "prepublishOnly": "npm run typecheck && npm test && npm run build"
   },
   "dependencies": {

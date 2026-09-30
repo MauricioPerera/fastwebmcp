@@ -16,6 +16,7 @@ export interface WebMcpMock {
 
 export function createWebMcpMock(): WebMcpMock {
   const registeredTools = new Map<string, RegisteredMockTool>();
+  const removeAbortListeners = new Map<string, () => void>();
 
   const document = {
     modelContext: {
@@ -23,13 +24,21 @@ export function createWebMcpMock(): WebMcpMock {
         const named = tool as RegisteredMockTool['tool'];
         const signal = (options as { signal?: AbortSignal } | undefined)?.signal;
         if (signal?.aborted) {
-          registeredTools.delete(named.name);
           return;
         }
-        registeredTools.set(named.name, { tool: named, options });
-        signal?.addEventListener('abort', () => {
-          registeredTools.delete(named.name);
-        });
+        removeAbortListeners.get(named.name)?.();
+        removeAbortListeners.delete(named.name);
+        const entry = { tool: named, options };
+        registeredTools.set(named.name, entry);
+        if (signal) {
+          const onAbort = () => {
+            if (registeredTools.get(named.name) !== entry) return;
+            registeredTools.delete(named.name);
+            removeAbortListeners.delete(named.name);
+          };
+          signal.addEventListener('abort', onAbort, { once: true });
+          removeAbortListeners.set(named.name, () => signal.removeEventListener('abort', onAbort));
+        }
       },
     },
   };
@@ -52,6 +61,8 @@ export function createWebMcpMock(): WebMcpMock {
   const getTool = (name: string): RegisteredMockTool | undefined => registeredTools.get(name);
 
   const reset = (): void => {
+    for (const remove of removeAbortListeners.values()) remove();
+    removeAbortListeners.clear();
     registeredTools.clear();
   };
 
@@ -59,8 +70,8 @@ export function createWebMcpMock(): WebMcpMock {
 }
 
 // Installs mock.document on globalThis for the duration of fn() and restores the
-// original property descriptor afterwards, so tests never leak globals. Mirrors
-// withDocument in tests_ts/mock-globals.ts, but shipped in the published package.
+// original property descriptor after synchronous completion or Promise settlement.
+// Async scopes must be serial, or nested and awaited: document is a shared global.
 export function withMockDocument<T>(mock: WebMcpMock, fn: () => T): T {
   const original = Object.getOwnPropertyDescriptor(globalThis, 'document');
   Object.defineProperty(globalThis, 'document', {
@@ -69,14 +80,24 @@ export function withMockDocument<T>(mock: WebMcpMock, fn: () => T): T {
     enumerable: true,
     configurable: true,
   });
-  try {
-    return fn();
-  } finally {
+  const restore = () => {
     if (original) {
       Object.defineProperty(globalThis, 'document', original);
     } else {
       delete (globalThis as { document?: unknown }).document;
     }
+  };
+  try {
+    const result = fn();
+    if (result != null && (typeof result === 'object' || typeof result === 'function') &&
+        typeof (result as { then?: unknown }).then === 'function') {
+      return Promise.resolve(result).finally(restore) as T;
+    }
+    restore();
+    return result;
+  } catch (error) {
+    restore();
+    throw error;
   }
 }
 

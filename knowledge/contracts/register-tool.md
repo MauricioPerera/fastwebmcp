@@ -23,6 +23,10 @@ forbids: ['network', 'subprocess', 'llm']
 
 # Contract: Registro seguro de una tool WebMCP con fallback no-op
 
+Ampliado por [correcciones de auditoria](./audit-runtime-fixes.md): el boolean
+sincrono confirma dispatch, no registro nativo; los rechazos asincronos emiten
+warning y registerToolAsync permite esperar y capturar el error original.
+
 ## Intent
 Cierra el ciclo de la API Imperativa acordado en
 [DEFINITION.md](../../DEFINITION.md): `defineTool()` ([contrato](./define-tool.md)) valida

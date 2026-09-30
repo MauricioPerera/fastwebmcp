@@ -73,7 +73,8 @@ function defineDeclarativeTool(form: DeclarativeFormElementLike, spec: Declarati
 - Si pasa la validacion: `form.setAttribute('toolname', spec.name)` y
   `form.setAttribute('tooldescription', spec.description)` siempre se llaman.
 - `toolautosubmit` solo se setea (con valor `''`, presencia-only) si `spec.autoSubmit`
-  es `true`; si es `false`/`undefined`, no se toca ese atributo.
+  es `true`; `undefined` preserva el atributo. `false` lo elimina, conforme a la
+  ampliacion [correcciones de auditoria](./audit-runtime-fixes.md).
 - Por cada `field` en `spec.fields` (default `[]`): busca en `form.elements` el elemento
   cuyo `name` coincide; si lo encuentra, `setAttribute('toolparamdescription',
   field.description)`; si NO lo encuentra, lanza mencionando el nombre buscado.
