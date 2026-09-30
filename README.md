@@ -2,18 +2,47 @@
 
 [![CI](https://github.com/MauricioPerera/fastwebmcp/actions/workflows/validate.yml/badge.svg)](https://github.com/MauricioPerera/fastwebmcp/actions/workflows/validate.yml)
 [![npm](https://img.shields.io/npm/v/fastwebmcp)](https://www.npmjs.com/package/fastwebmcp)
-[![GitHub release](https://img.shields.io/github/v/release/MauricioPerera/fastwebmcp)](https://github.com/MauricioPerera/fastwebmcp/releases/tag/v0.4.2)
+[![GitHub release](https://img.shields.io/github/v/release/MauricioPerera/fastwebmcp)](https://github.com/MauricioPerera/fastwebmcp/releases)
 [![license](https://img.shields.io/npm/l/fastwebmcp)](LICENSE)
 
-FastMCP-style ergonomics for [WebMCP](https://github.com/webmachinelearning/webmcp): typed
-Zod builders over the browser's Imperative and Declarative APIs, with safe no-op +
-warning degradation when `document.modelContext` isn't available (WebMCP is still an
-origin trial as of Chrome 149+ — most visitors won't have it yet).
+Typed [WebMCP](https://github.com/webmachinelearning/webmcp) tools for browser agents,
+with FastMCP-style ergonomics. Define inputs with Zod, run your application's own
+handlers, and let an agent work on the same visible page as the user.
+
+The library supports imperative tools, declarative HTML forms, confirmed async
+registration, testing helpers and optional LSFA integration. An interactive
+[text editor](examples/text-editor/) demonstrates eight tools acting on a real document.
+
+| Capability | What it provides |
+| --- | --- |
+| Typed tools | Zod input parsing and generated JSON Schema |
+| Async registration | Await native registration and handle its original errors |
+| HTML forms | Declarative tool attributes and agent-submit responses |
+| Lifecycle | AbortSignal cleanup for registered tools |
+| Testing | Invoke real handlers through an in-memory WebMCP mock |
+| Optional LSFA | Delegate non-sensitive intent to an application-owned broker |
+| Text editor | Visible editing, revision checks, undo/redo and local drafts |
+
+WebMCP availability depends on the browser and its configuration. Use
+`supportsWebMcp()` to check it. When `document.modelContext` is missing, registration
+returns `false` and emits a warning; the text editor remains usable manually.
 
 ## Install
 
 ```sh
 npm install fastwebmcp
+```
+
+The async registration APIs and text editor described here are currently tracked
+under **Unreleased** in the [changelog](CHANGELOG.md). The npm command installs
+the published release; to try the repository changes, build from source:
+
+```sh
+git clone https://github.com/MauricioPerera/fastwebmcp.git
+cd fastwebmcp
+npm ci
+npm run build
+npm run build:examples
 ```
 
 ## Imperative API
@@ -43,6 +72,24 @@ For confirmed registration, use `await registerToolAsync(spec, options)`. It res
 to `true` only after the native registration completes, resolves to `false` when
 WebMCP is unavailable, and rejects with the original browser error (for example,
 duplicate names or denied permissions). Handle the rejection with `try`/`catch`.
+
+```ts
+import { z } from 'zod';
+import { registerToolAsync } from 'fastwebmcp';
+
+try {
+  const registered = await registerToolAsync({
+    name: 'sum_numbers',
+    description: 'Add two numbers and return their sum.',
+    inputSchema: z.object({ a: z.number(), b: z.number() }),
+    execute: ({ a, b }) => ({ sum: a + b }),
+  });
+  console.log(registered ? 'Tool registered' : 'WebMCP unavailable');
+} catch (error) {
+  console.error('Tool registration failed', error);
+}
+```
+
 The synchronous `registerTool` remains compatible: `true` means the request was
 dispatched, and a later native rejection emits a warning. Synchronous errors still
 propagate. The browser API's registration contract is documented in the
@@ -93,6 +140,7 @@ before the form is modified. Native HTML forms already provide this method.
 ```ts
 import {
   createWebMcpMock,
+  registerToolAsync,
   withMockDocument,
   createMockAgentSubmitEvent,
   respondToAgentSubmit,
@@ -112,8 +160,10 @@ mock.reset(); // clears all registered tools for the next test
 
 // Unregistration via AbortSignal (WebMCP spec):
 const controller = new AbortController();
-registerTool(mySpec, { signal: controller.signal });
-controller.abort(); // tool is automatically removed from mock
+await withMockDocument(mock, async () => {
+  await registerToolAsync(mySpec, { signal: controller.signal });
+  controller.abort(); // tool is automatically removed from mock
+});
 
 // Testing declarative form submissions:
 const { event, waitForResponse } = createMockAgentSubmitEvent();
@@ -257,10 +307,15 @@ Runnable demo pages, verified against a real `document.modelContext`, live in
 
 ```sh
 npm run build:examples
-npx http-server .   # or any static file server
-# open examples/ux-page/imperative-demo.html and .../declarative-demo.html
-# or examples/text-editor/ for the interactive text editor
+python -m http.server 8349 --bind 127.0.0.1   # or any static file server
 ```
+
+Open one of these pages on the local server:
+
+- [Text editor](http://127.0.0.1:8349/examples/text-editor/)
+- [Imperative tools](http://127.0.0.1:8349/examples/ux-page/imperative-demo.html)
+- [Declarative forms](http://127.0.0.1:8349/examples/ux-page/declarative-demo.html)
+- [LSFA simulation](http://127.0.0.1:8349/examples/ux-page/lsfa-demo.html)
 
 The [text editor](examples/text-editor/) exposes eight WebMCP tools to read,
 write, insert, replace, find, select, undo and redo the visible document. It saves
@@ -269,11 +324,37 @@ read revision to protect concurrent human changes. See its
 [run instructions](examples/text-editor/README.md) and
 [verification report](docs/reports/CONTRACT-54-REPORT.md).
 
+| Editor tool | Action |
+| --- | --- |
+| `editor_read` | Read text, title, selection, statistics and revision |
+| `editor_write` | Replace text and optionally the title |
+| `editor_insert` | Insert at a specified position |
+| `editor_replace` | Replace the first or all literal matches |
+| `editor_find` | Return matching text ranges |
+| `editor_select` | Highlight a range in the visible textarea |
+| `editor_undo` | Restore the previous document state |
+| `editor_redo` | Restore an undone change |
+
+For an agent workflow, discover the page's registered WebMCP tools, call
+`editor_read`, then pass its `revision` as `expectedRevision` to edits and
+selection. A stale revision is rejected without changing the document. Read
+again before retrying. Positions use zero-based UTF-16 offsets.
+
+All eight tools were invoked through native WebMCP in Codex's in-app browser.
+The example also has an automated regression test. Drafts are stored in
+localStorage; undo history lasts for the current page session. The user can
+download the document as `.txt` from the toolbar.
+
 ## API surface
 
-`supportsWebMcp()` · `defineTool(spec)` · `registerTool(spec, options?)` ·
-`createWebMcpMock()` · `defineDeclarativeTool(form, spec)` · `respondToAgentSubmit(event, handler)` ·
-`toMcpwasmSkillSource(tool, options?)` · `defineLsfaTool(spec)` · `registerLsfaTool(spec, options?)`
+| Import | Functions |
+| --- | --- |
+| `fastwebmcp` | `supportsWebMcp`, `defineTool`, `registerTool`, `registerToolAsync`, `defineDeclarativeTool`, `respondToAgentSubmit`, `toMcpwasmSkillSource` |
+| `fastwebmcp` testing helpers | `createWebMcpMock`, `withMockDocument`, `createMockAgentSubmitEvent` |
+| `fastwebmcp/lsfa` | `defineLsfaTool`, `registerLsfaTool`, `registerLsfaToolAsync` |
+| `fastwebmcp/lsfa/testing` | `createLsfaBrokerMock` |
+
+LSFA builders are also exported from `fastwebmcp` for convenience.
 
 ## Changelog
 
